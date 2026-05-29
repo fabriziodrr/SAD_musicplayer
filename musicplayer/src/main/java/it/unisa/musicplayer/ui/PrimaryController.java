@@ -177,7 +177,7 @@ public class PrimaryController {
         if (btnOpenMockDialog != null) {
             btnOpenMockDialog.setOnAction(e -> {
                 try {
-                    javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("song_dialog.fxml"));
+                    javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/fxml/song_dialog.fxml"));
                     DialogPane dialogPane = loader.load();
                     SongDialogController dialogController = loader.getController();
                     
@@ -222,7 +222,7 @@ public class PrimaryController {
                 }
 
                 try {
-                    javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("song_dialog.fxml"));
+                    javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/fxml/song_dialog.fxml"));
                     DialogPane dialogPane = loader.load();
                     SongDialogController dialogController = loader.getController();
                     

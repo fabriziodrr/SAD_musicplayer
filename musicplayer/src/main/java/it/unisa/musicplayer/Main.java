@@ -11,7 +11,7 @@ public class Main extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        FXMLLoader loader = new FXMLLoader(Main.class.getResource("/fxml/main-view.fxml"));
+        FXMLLoader loader = new FXMLLoader(Main.class.getResource("/fxml/primary.fxml"));
         Scene scene = new Scene(loader.load(), 900, 600);
 
         stage.setTitle("Music Playlist Manager");
