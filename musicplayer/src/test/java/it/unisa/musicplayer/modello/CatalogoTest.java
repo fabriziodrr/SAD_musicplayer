@@ -23,6 +23,8 @@ class CatalogoTest {
         catalogo.svuota();
     }
 
+    // ── 1. TEST STRUTTURA E SINGLETON ─────────────────────────────────────────
+
     @Test
     void testGetInstanceRestituisceStessaIstanza() {
         Catalogo altra = Catalogo.getInstance();
@@ -30,51 +32,10 @@ class CatalogoTest {
     }
 
     @Test
-    void testGetTracceRestituisceListaNonVuotaDopoAggiunta() {
-        Traccia t = new Traccia(UUID.randomUUID().toString(), "Bohemian Rhapsody", "Queen", "5:55", "Rock", 1975);
-        catalogo.aggiungiTraccia(t);
-
-        ObservableList<Traccia> tracce = catalogo.getTracce();
-        assertNotNull(tracce);
-        assertEquals(1, tracce.size());
-        assertEquals("Bohemian Rhapsody", tracce.get(0).getTitolo());
-        assertEquals("Queen", tracce.get(0).getAutore());
-    }
-
-    @Test
     void testGetTracceAllAvvioRestituisceListaVuota() {
         ObservableList<Traccia> tracce = catalogo.getTracce();
         assertNotNull(tracce);
         assertTrue(tracce.isEmpty());
-    }
-
-    @Test
-    void testContieneRestituisceTruePerTracciaEsistente() {
-        Traccia t = new Traccia(UUID.randomUUID().toString(), "Imagine", "John Lennon", "3:07", "Pop", 1971);
-        catalogo.aggiungiTraccia(t);
-        assertTrue(catalogo.contiene("Imagine", "John Lennon"));
-    }
-
-    @Test
-    void testContieneCaseInsensitive() {
-        Traccia t = new Traccia(UUID.randomUUID().toString(), "Imagine", "John Lennon", "3:07", "Pop", 1971);
-        catalogo.aggiungiTraccia(t);
-        assertTrue(catalogo.contiene("imagine", "john lennon"));
-        assertTrue(catalogo.contiene("IMAGINE", "JOHN LENNON"));
-    }
-
-    @Test
-    void testContieneRestituisceFalsePerTracciaInesistente() {
-        assertFalse(catalogo.contiene("Inesistente", "Nessuno"));
-    }
-
-    @Test
-    void testAggiungiTracciaLanciaEccezionePerDuplicato() {
-        Traccia t1 = new Traccia(UUID.randomUUID().toString(), "Song", "Artist", "3:00", "Pop", 2020);
-        catalogo.aggiungiTraccia(t1);
-
-        Traccia t2 = new Traccia(UUID.randomUUID().toString(), "Song", "Artist", "4:00", "Rock", 2021);
-        assertThrows(IllegalArgumentException.class, () -> catalogo.aggiungiTraccia(t2));
     }
 
     @Test
@@ -95,6 +56,138 @@ class CatalogoTest {
         catalogo.svuota();
         assertEquals(0, catalogo.getSize());
         assertTrue(catalogo.getTracce().isEmpty());
+    }
+
+    // ── 2. TEST AGGIUNTA TRACCIA ───────────────────────────────────────
+
+    @Test
+    void testGetTracceRestituisceListaNonVuotaDopoAggiunta() {
+        Traccia t = new Traccia(UUID.randomUUID().toString(), "Bohemian Rhapsody", "Queen", "5:55", "Rock", 1975);
+        catalogo.aggiungiTraccia(t);
+
+        // Verifica inserimento corretto
+        ObservableList<Traccia> tracce = catalogo.getTracce();
+        assertNotNull(tracce);
+        assertEquals(1, tracce.size());
+        assertEquals("Bohemian Rhapsody", tracce.get(0).getTitolo());
+        assertEquals("Queen", tracce.get(0).getAutore());
+    }
+
+    @Test
+    void testAggiungiTracciaLanciaEccezioneSeNull() {
+        assertThrows(IllegalArgumentException.class, () -> catalogo.aggiungiTraccia(null));
+    }
+
+    @Test
+    void testAggiungiTracciaLanciaEccezionePerDuplicato() {
+        Traccia t1 = new Traccia(UUID.randomUUID().toString(), "Song", "Artist", "3:00", "Pop", 2020);
+        catalogo.aggiungiTraccia(t1);
+
+        Traccia t2 = new Traccia(UUID.randomUUID().toString(), "Song", "Artist", "4:00", "Rock", 2021);
+        assertThrows(IllegalArgumentException.class, () -> catalogo.aggiungiTraccia(t2));
+    }
+
+    @Test
+    void testAggiungiTracciaDuplicataCaseInsensitive() {
+        Traccia t1 = new Traccia(UUID.randomUUID().toString(), "Spaccacuore", "Samuele Bersani", "4:20", "Pop", 1994);
+        catalogo.aggiungiTraccia(t1);
+
+        // Stesso titolo e autore ma con maiuscole/minuscole diverse
+        Traccia t2 = new Traccia(UUID.randomUUID().toString(), "SPACCACUORE", "samuele bersani", "4:20", "Pop", 1994);
+        assertThrows(IllegalArgumentException.class, () -> catalogo.aggiungiTraccia(t2));
+    }
+
+    @Test
+    void testAggiungiTracciaConStessoTitoloMaAutoreDiverso() {
+        // Il vincolo di unicità si applica alla coppia (Titolo + Autore), canzoni omonime sono permesse
+        Traccia t1 = new Traccia(UUID.randomUUID().toString(), "Hello", "Adele", "4:55", "Pop", 2015);
+        Traccia t2 = new Traccia(UUID.randomUUID().toString(), "Hello", "Lionel Richie", "4:08", "Pop", 1983);
+
+        assertDoesNotThrow(() -> catalogo.aggiungiTraccia(t1));
+        assertDoesNotThrow(() -> catalogo.aggiungiTraccia(t2));
+        assertEquals(2, catalogo.getSize());
+    }
+
+    // ── 3. TEST MODIFICA TRACCIA ───────────────────────────────────────
+
+    @Test
+    void testModificaTracciaDatiSecondariSuccesso() {
+        Traccia vecchia = new Traccia(UUID.randomUUID().toString(), "Anima Fragile", "Vasco Rossi", "4:00", "Rock", 1980);
+        catalogo.aggiungiTraccia(vecchia);
+
+        // Modifica parziale senza toccare la coppia identificativa (titolo/autore)
+        Traccia nuova = new Traccia(vecchia.getId(), "Anima Fragile", "Vasco Rossi", "4:30", "Rock Italiano", 1980);
+        
+        assertDoesNotThrow(() -> catalogo.modificaTraccia(vecchia, nuova));
+        
+        Traccia aggiornata = catalogo.getTracce().get(0);
+        assertEquals("4:30", aggiornata.getDurata());
+        assertEquals("Rock Italiano", aggiornata.getGenere());
+    }
+
+    @Test
+    void testModificaTracciaCambioTitoloEAutoreSuccesso() {
+        Traccia vecchia = new Traccia(UUID.randomUUID().toString(), "Vento d'estate", "Max Gazzè", "3:40", "Pop", 1998);
+        catalogo.aggiungiTraccia(vecchia);
+
+        // Modifica completa dei dati (nuovo identikit non occupato)
+        Traccia nuova = new Traccia(vecchia.getId(), "L'uomo più furbo", "Max Gazzè", "4:00", "Pop", 2000);
+
+        assertDoesNotThrow(() -> catalogo.modificaTraccia(vecchia, nuova));
+        assertFalse(catalogo.contiene("Vento d'estate", "Max Gazzè"));
+        assertTrue(catalogo.contiene("L'uomo più furbo", "Max Gazzè"));
+    }
+
+    @Test
+    void testModificaTracciaLanciaEccezioneSeNuovoIdentikitEUnDuplicato() {
+        Traccia t1 = new Traccia(UUID.randomUUID().toString(), "Albachiara", "Vasco Rossi", "4:03", "Rock", 1979);
+        Traccia t2 = new Traccia(UUID.randomUUID().toString(), "Rewind", "Vasco Rossi", "3:50", "Rock", 1999);
+        catalogo.aggiungiTraccia(t1);
+        catalogo.aggiungiTraccia(t2);
+
+        // Tento di modificare t2 dandogli lo stesso titolo e autore di t1
+        Traccia t2ModificataInDuplicato = new Traccia(t2.getId(), "Albachiara", "Vasco Rossi", "3:50", "Rock", 1999);
+
+        assertThrows(IllegalArgumentException.class, () -> catalogo.modificaTraccia(t2, t2ModificataInDuplicato));
+    }
+
+    @Test
+    void testModificaTracciaLanciaEccezioneSeVecchiaNonEsiste() {
+        Traccia vecchiaInesistente = new Traccia(UUID.randomUUID().toString(), "Mai Inserita", "Nessuno", "3:00", "Pop", 2020);
+        Traccia nuova = new Traccia(UUID.randomUUID().toString(), "Nuova", "Qualcuno", "3:00", "Pop", 2020);
+
+        assertThrows(IllegalArgumentException.class, () -> catalogo.modificaTraccia(vecchiaInesistente, nuova));
+    }
+
+    @Test
+    void testModificaTracciaLanciaEccezioneConParametriNull() {
+        Traccia valida = new Traccia(UUID.randomUUID().toString(), "Titolo", "Autore", "3:00", "Pop", 2020);
+        catalogo.aggiungiTraccia(valida);
+
+        assertThrows(IllegalArgumentException.class, () -> catalogo.modificaTraccia(null, valida));
+        assertThrows(IllegalArgumentException.class, () -> catalogo.modificaTraccia(valida, null));
+    }
+
+    // ── 4. TEST DI RICERCA E PERSISTENZA ──────────────────────────────────────
+
+    @Test
+    void testContieneRestituisceTruePerTracciaEsistente() {
+        Traccia t = new Traccia(UUID.randomUUID().toString(), "Imagine", "John Lennon", "3:07", "Pop", 1971);
+        catalogo.aggiungiTraccia(t);
+        assertTrue(catalogo.contiene("Imagine", "John Lennon"));
+    }
+
+    @Test
+    void testContieneCaseInsensitive() {
+        Traccia t = new Traccia(UUID.randomUUID().toString(), "Imagine", "John Lennon", "3:07", "Pop", 1971);
+        catalogo.aggiungiTraccia(t);
+        assertTrue(catalogo.contiene("imagine", "john lennon"));
+        assertTrue(catalogo.contiene("IMAGINE", "JOHN LENNON"));
+    }
+
+    @Test
+    void testContieneRestituisceFalsePerTracciaInesistente() {
+        assertFalse(catalogo.contiene("Inesistente", "Nessuno"));
     }
 
     @Test
