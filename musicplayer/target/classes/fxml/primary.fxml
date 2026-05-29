@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.StackPane?>
+
+<StackPane xmlns="http://javafx.com/javafx"
+           xmlns:fx="http://javafx.com/fxml"
+           fx:controller="it.unisa.musicplayer.ui.PrimaryController"
+           prefWidth="900.0"
+           prefHeight="600.0">
+    <Label text="Music Playlist Manager" />
+</StackPane>
