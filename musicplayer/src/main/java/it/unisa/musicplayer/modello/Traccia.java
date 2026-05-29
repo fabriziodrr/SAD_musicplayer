@@ -1,38 +1,29 @@
 package it.unisa.musicplayer.modello;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Set;
 
-/**
- * Rappresenta una singola traccia musicale nel catalogo.
- * Contiene i dati anagrafici del brano, i tag visivi associati
- * e il contatore delle riproduzioni usato dalle Statistiche.
- */
 public class Traccia {
 
-    // ── Campi ────────────────────────────────────────────────────────────────
-
-    private final String id;        // identificatore univoco (UUID assegnato alla creazione)
+    private final String id;
     private String titolo;
     private String autore;
-    private String durata;          // formato mm:ss  es. "3:45"
+    private String durata;
     private String genere;
     private int    anno;
-    private final Set<Tag> tag;    // EnumSet: efficiente e ordinato per dichiarazione enum
+    private final Set<Tag> tag;
     private int contaRiproduzioni;
 
-    // ── Costruttore ───────────────────────────────────────────────────────────
-
-    /**
-     * Crea una nuova traccia. Tutti i parametri stringa sono obbligatori e
-     * non possono essere null o blank; la durata deve rispettare il formato
-     * mm:ss; l'anno deve essere un valore positivo.
-     *
-     * @throws IllegalArgumentException se uno qualsiasi dei vincoli non è rispettato
-     */
-    public Traccia(String id, String titolo, String autore,
-                   String durata, String genere, int anno) {
+    @JsonCreator
+    public Traccia(@JsonProperty("id") String id,
+                   @JsonProperty("titolo") String titolo,
+                   @JsonProperty("autore") String autore,
+                   @JsonProperty("durata") String durata,
+                   @JsonProperty("genere") String genere,
+                   @JsonProperty("anno") int anno) {
 
         validaStringa(id,     "id");
         validaStringa(titolo, "titolo");
@@ -61,16 +52,13 @@ public class Traccia {
     public int    getAnno()   { return anno; }
     public int    getContaRiproduzioni() { return contaRiproduzioni; }
 
-    /**
-     * Restituisce una copia difensiva del set di tag per evitare
-     * modifiche esterne non controllate.
-     */
+    
+    //Restituisce una copia difensiva del set di tag per evitare modifiche esterne non controllate.
     public Set<Tag> getTag() {
         return EnumSet.copyOf(tag.isEmpty() ? EnumSet.noneOf(Tag.class) : tag);
     }
 
-    // ── Setter (con validazione) ──────────────────────────────────────────────
-
+    //Setter(con validazione) 
     public void setTitolo(String titolo) {
         validaStringa(titolo, "titolo");
         this.titolo = titolo.trim();
@@ -96,47 +84,39 @@ public class Traccia {
         this.anno = anno;
     }
 
-    // ── Gestione Tag ─────────────────────────────────────────────────────────
-
-    /**
-     * Aggiunge un tag visivo alla traccia. Operazione idempotente:
-     * aggiungere un tag già presente non ha effetti.
-     */
+    // Gestione Tag 
+    // Aggiunge un tag visivo alla traccia. Operazione idempotente:aggiungere un tag già presente non ha effetti.
     public void aggiungiTag(Tag tag) {
         Objects.requireNonNull(tag, "Il tag non può essere null");
         this.tag.add(tag);
     }
 
-    /**
-     * Rimuove un tag visivo dalla traccia. Operazione idempotente:
-     * rimuovere un tag non presente non ha effetti.
-     */
+    
+    //Rimuove un tag visivo dalla traccia. Operazione idempotente:rimuovere un tag non presente non ha effetti.
     public void rimuoviTag(Tag tag) {
         Objects.requireNonNull(tag, "Il tag non può essere null");
         this.tag.remove(tag);
     }
 
-    /** Restituisce true se la traccia ha il tag specificato. */
+    //Restituisce true se la traccia ha il tag specificato.
     public boolean hasTag(Tag tag) {
         Objects.requireNonNull(tag, "Il tag non può essere null");
         return this.tag.contains(tag);
     }
 
-    // ── Riproduzione ─────────────────────────────────────────────────────────
+    //Riproduzione 
 
-    /**
-     * Incrementa il contatore delle riproduzioni.
-     * Chiamato da Lettore ogni volta che la traccia viene riprodotta.
-     */
+
+    //Incrementa il contatore delle riproduzioni: chiamato da Lettore ogni volta che la traccia viene riprodotta.
     public void incrementaRiproduzioni() {
         contaRiproduzioni++;
     }
 
-    // ── equals, hashCode, compareTo, toString ────────────────────────────────
+    
 
-    /**
-     * Due tracce sono uguali se e solo se hanno lo stesso id.
-     * Necessario per il corretto funzionamento in Set e Map.
+    /*
+      Due tracce sono uguali se e solo se hanno lo stesso id.
+      Necessario per il corretto funzionamento in Set e Map.
      */
     @Override
     public boolean equals(Object obj) {
@@ -146,18 +126,17 @@ public class Traccia {
         return id.equals(altra.id);
     }
 
-    /**
-     * Consistente con equals: basato solo sull'id.
-     */
+    
+    //Consistente con equals: basato solo sull'id.
     @Override
     public int hashCode() {
         return Objects.hash(id);
     }
 
-    /**
-     * Ordinamento naturale per titolo (case-insensitive),
-     * con autore come criterio di spareggio.
-     * Usato da Collections.sort() e TreeSet senza Comparator esplicito.
+    /*
+     Ordinamento naturale per titolo (case-insensitive),
+     con autore come criterio di spareggio.
+     Usato da Collections.sort() e TreeSet senza Comparator esplicito.
      */
     public int compareTo(Traccia altra) {
         int cmp = this.titolo.compareToIgnoreCase(altra.titolo);
@@ -172,7 +151,7 @@ public class Traccia {
                              id, titolo, autore, durata, genere, anno, tag);
     }
 
-    // ── Validazione (privata) ─────────────────────────────────────────────────
+    //Validazione(privata) 
 
     private static void validaStringa(String valore, String nomeCampo) {
         if (valore == null || valore.trim().isEmpty()) {
@@ -181,9 +160,9 @@ public class Traccia {
         }
     }
 
-    /**
-     * La durata deve rispettare il formato mm:ss dove mm >= 0 e 0 <= ss <= 59.
-     * Esempi validi: "3:45", "0:30", "12:00"
+    /*
+     La durata deve rispettare il formato mm:ss dove mm >= 0 e 0 <= ss <= 59.
+     Esempi validi: "3:45", "0:30", "12:00"
      */
     private static void validaDurata(String durata) {
         if (durata == null || durata.trim().isEmpty()) {

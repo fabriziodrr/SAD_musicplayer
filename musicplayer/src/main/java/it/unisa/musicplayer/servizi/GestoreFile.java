@@ -18,9 +18,7 @@ public class GestoreFile {
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
     }
 
-    /**
-     * Rintraccia dinamicamente la cartella Desktop dell'utente corrente.
-     */
+    // Rintraccia dinamicamente la cartella Desktop dell'utente corrente. 
     private static String getDesktopPath() {
         String userHome = System.getProperty("user.home");
         return userHome + File.separator + "Desktop" + File.separator + "catalogo_spotify.json";
@@ -37,6 +35,29 @@ public class GestoreFile {
         } catch (IOException e) {
             System.err.println("[ERRORE SAVE] Impossibile scrivere il file JSON sul Desktop: " + e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    
+     // Carica i dati dal file JSON sul Desktop. Se il file non esiste o è corrotto, restituisce un DatiApplicazione vuoto.
+    
+    public static DatiApplicazione importa() {
+        return importaDaPercorso(getDesktopPath());
+    }
+
+    static DatiApplicazione importaDaPercorso(String percorso) {
+        try {
+            File file = new File(percorso);
+            if (!file.exists()) {
+                System.out.println("[LOAD] Nessun file trovato in " + percorso + ", avvio con catalogo vuoto.");
+                return new DatiApplicazione();
+            }
+            DatiApplicazione dati = mapper.readValue(file, DatiApplicazione.class);
+            System.out.println("[LOAD OK] Catalogo caricato da: " + percorso);
+            return dati;
+        } catch (IOException e) {
+            System.err.println("[ERRORE LOAD] Impossibile leggere il file JSON: " + e.getMessage());
+            return new DatiApplicazione();
         }
     }
 }

@@ -48,6 +48,14 @@ public class Catalogo {
         GestoreFile.esporta(pacchettoDati);
     }
 
+    //Carica i dati dal file JSON all'avvio dell'applicazione.
+    public void caricaDaFile() {
+        DatiApplicazione dati = GestoreFile.importa();
+        if (dati.getCanzoni() != null && !dati.getCanzoni().isEmpty()) {
+            tracce.addAll(dati.getCanzoni());
+        }
+    }
+
     // ── Getter ────────────────────────────────────────────────────────────────
 
     public ObservableList<Traccia> getTracce() {
