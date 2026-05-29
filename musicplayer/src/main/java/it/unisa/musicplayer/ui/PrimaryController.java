@@ -281,5 +281,52 @@ public class PrimaryController {
                 }
             });
         }
+
+        // 9. INTERFACCIA DI RIMOZIONE BRANO DAL CATALOGO (US-05)
+        if (btnRemoveTrack != null) {
+            btnRemoveTrack.setOnAction(e -> {
+                Traccia tracciaSelezionata = songTableView.getSelectionModel().getSelectedItem();
+
+                if (tracciaSelezionata == null) {
+                    Alert alert = new Alert(
+                            Alert.AlertType.WARNING,
+                            "Seleziona prima una traccia dalla tabella."
+                    );
+                    alert.setTitle("Nessuna traccia selezionata");
+                    alert.setHeaderText(null);
+                    alert.showAndWait();
+                    return;
+                }
+
+                Alert conferma = new Alert(Alert.AlertType.CONFIRMATION);
+                conferma.setTitle("Conferma eliminazione");
+                conferma.setHeaderText("Eliminare definitivamente la traccia?");
+                conferma.setContentText(
+                        "La traccia \"" + tracciaSelezionata.getTitolo() + "\" verrà rimossa dal catalogo " +
+                                "e da tutte le playlist in cui è presente."
+                );
+
+                java.util.Optional<ButtonType> scelta = conferma.showAndWait();
+
+                if (scelta.isPresent() && scelta.get() == ButtonType.OK) {
+                    try {
+                        Catalogo.getInstance().rimuoviTraccia(tracciaSelezionata);
+                        songTableView.getSelectionModel().clearSelection();
+
+                        if (currentTrackLabel != null &&
+                                currentTrackLabel.getText().equals(tracciaSelezionata.getTitolo())) {
+                            currentTrackLabel.setText("Seleziona un brano");
+                        }
+
+                    } catch (IllegalArgumentException ex) {
+                        Alert alert = new Alert(Alert.AlertType.ERROR, ex.getMessage());
+                        alert.setTitle("Errore eliminazione");
+                        alert.setHeaderText(null);
+                        alert.showAndWait();
+                    }
+                }
+            });
+        }
+
     }
 }
