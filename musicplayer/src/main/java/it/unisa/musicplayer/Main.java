@@ -1,6 +1,7 @@
 package it.unisa.musicplayer;
 
 import it.unisa.musicplayer.modello.Catalogo;
+import it.unisa.musicplayer.modello.CatalogoPlaylist;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -13,6 +14,7 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         Catalogo.getInstance().caricaDaFile();
+        CatalogoPlaylist.getInstance().caricaDaFile();
 
         FXMLLoader loader = new FXMLLoader(Main.class.getResource("/fxml/primary.fxml"));
         Scene scene = new Scene(loader.load(), 900, 600);

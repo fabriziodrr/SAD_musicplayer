@@ -1,8 +1,6 @@
 package it.unisa.musicplayer.ui;
 
 import it.unisa.musicplayer.modello.*; 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -18,9 +16,10 @@ public class PrimaryController {
     // Ora è perfettamente mappato sull'id dell'FXML modificato
     @FXML private Button btnEditTrack; 
     @FXML private Button btnRemoveTrack;
+    @FXML private Button createNewPlaylistButton;
 
     // Elementi di testo, etichette e liste
-    @FXML private ListView<String> sidebarListView;
+    @FXML private ListView<Playlist> sidebarListView;
     @FXML private ListView<String> topTracksListView;
     @FXML private ListView<String> topPlaylistsListView;
     @FXML private Label currentTrackLabel;
@@ -34,8 +33,6 @@ public class PrimaryController {
     @FXML private TableColumn<Traccia, Integer> yearColumn;
     @FXML private TableColumn<Traccia, String> durationColumn;
 
-    private ObservableList<Traccia> singlePlaylistData;
-
     @FXML
     public void initialize() {
         
@@ -44,8 +41,6 @@ public class PrimaryController {
             songTableView.setItems(Catalogo.getInstance().getTracce());
             songTableView.setPlaceholder(new Label("Nessuna traccia presente"));
         }
-        
-        singlePlaylistData = FXCollections.observableArrayList();
 
         // 2. CONFIGURAZIONE DELLE COLONNE CON I GETTER DELLA CLASSE TRACCIA
         titleColumn.setCellValueFactory(new PropertyValueFactory<>("titolo"));
@@ -152,16 +147,47 @@ public class PrimaryController {
             });
         }
 
-        // 5. COMPORTAMENTO CLIC SIDEBAR PLAYLIST
+        // 5. COMPORTAMENTO CLIC SIDEBAR PLAYLIST (BINDING CON CATALOGOPLAYLIST)
         if (sidebarListView != null) {
-            sidebarListView.getItems().addAll("⚡ Rock Classics", "☕ Jazz Chillout", "🎵 Workout Hits", "🧠 Focus Coding");
+            sidebarListView.setItems(CatalogoPlaylist.getInstance().getPlaylists());
+            sidebarListView.setPlaceholder(new Label("Nessuna playlist presente"));
             sidebarListView.getSelectionModel().selectedItemProperty().addListener((o, old, newVal) -> {
                 if (newVal != null) {
                     mainTabPane.getSelectionModel().select(0);
                     btnNavHome.setStyle("-fx-background-color: transparent; -fx-text-fill: #FFFFFF; -fx-font-weight: bold;");
                     btnNavStats.setStyle("-fx-background-color: transparent; -fx-text-fill: #B3B3B3;");
-                    if (catalogTitleLabel != null) catalogTitleLabel.setText("Contenuto: " + newVal);
-                    if (songTableView != null) songTableView.setItems(singlePlaylistData);
+                    if (catalogTitleLabel != null) catalogTitleLabel.setText("Playlist: " + newVal.getNome());
+                    if (songTableView != null) songTableView.setItems(newVal.getTracce());
+                }
+            });
+        }
+
+        // 5B. PULSANTE CREAZIONE NUOVA PLAYLIST
+        if (createNewPlaylistButton != null) {
+            createNewPlaylistButton.setOnAction(e -> {
+                try {
+                    javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/fxml/new_playlist_dialog.fxml"));
+                    DialogPane dialogPane = loader.load();
+                    NewPlaylistController dialogController = loader.getController();
+
+                    Dialog<ButtonType> dialog = new Dialog<>();
+                    dialog.setDialogPane(dialogPane);
+                    dialog.setTitle("Nuova Playlist");
+                    dialog.getDialogPane().getButtonTypes().setAll(ButtonType.OK, ButtonType.CANCEL);
+
+                    java.util.Optional<ButtonType> result = dialog.showAndWait();
+                    if (result.isPresent() && result.get() == ButtonType.OK) {
+                        try {
+                            String nome = dialogController.getNomePlaylist();
+                            Playlist nuova = new Playlist(nome);
+                            CatalogoPlaylist.getInstance().aggiungiPlaylist(nuova);
+                        } catch (IllegalArgumentException ex) {
+                            Alert alert = new Alert(Alert.AlertType.ERROR, ex.getMessage());
+                            alert.showAndWait();
+                        }
+                    }
+                } catch (Exception ex) {
+                    ex.printStackTrace();
                 }
             });
         }

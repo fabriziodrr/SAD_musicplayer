@@ -42,8 +42,9 @@ public class Catalogo {
      * Confeziona le canzoni correnti dentro il Wrapper e lancia l'esportazione.
      */
     public void eseguiSalvataggioAutomatico() {
-        DatiApplicazione pacchettoDati = new DatiApplicazione(
-            new ArrayList<>(this.tracce)
+        DatiApplicazione pacchettoDati = DatiApplicazione.costruisci(
+            new ArrayList<>(this.tracce),
+            new ArrayList<>(CatalogoPlaylist.getInstance().getPlaylists())
         );
         GestoreFile.esporta(pacchettoDati);
     }

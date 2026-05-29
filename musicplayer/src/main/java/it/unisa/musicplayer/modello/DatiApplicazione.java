@@ -3,30 +3,41 @@ package it.unisa.musicplayer.modello;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Oggetto contenitore (Wrapper) per la serializzazione su file JSON.
- * Configurato esclusivamente per il catalogo delle canzoni.
- */
 public class DatiApplicazione {
-    
-    private List<Traccia> canzoni;
 
-    /** Costruttore vuoto necessario per la deserializzazione Jackson */
+    private List<Traccia> canzoni;
+    private List<Playlist> playlists;
+
     public DatiApplicazione() {
         this.canzoni = new ArrayList<>();
+        this.playlists = new ArrayList<>();
     }
 
-    /** Costruttore utilizzato dal flusso di salvataggio automatico */
     public DatiApplicazione(List<Traccia> canzoni) {
+        this.canzoni = canzoni != null ? canzoni : new ArrayList<>();
+        this.playlists = new ArrayList<>();
+    }
+
+    public static DatiApplicazione costruisci(List<Traccia> canzoni, List<Playlist> playlists) {
+        DatiApplicazione d = new DatiApplicazione();
+        d.canzoni = canzoni != null ? canzoni : new ArrayList<>();
+        d.playlists = playlists != null ? playlists : new ArrayList<>();
+        return d;
+    }
+
+    public List<Traccia> getCanzoni() {
+        return canzoni;
+    }
+
+    public void setCanzoni(List<Traccia> canzoni) {
         this.canzoni = canzoni;
     }
 
-    // Getter e Setter fondamentali per Jackson
-    public List<Traccia> getCanzoni() { 
-        return canzoni; 
+    public List<Playlist> getPlaylists() {
+        return playlists;
     }
-    
-    public void setCanzoni(List<Traccia> canzoni) { 
-        this.canzoni = canzoni; 
+
+    public void setPlaylists(List<Playlist> playlists) {
+        this.playlists = playlists;
     }
 }
