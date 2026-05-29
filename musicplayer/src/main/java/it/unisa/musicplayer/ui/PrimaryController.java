@@ -42,6 +42,7 @@ public class PrimaryController {
         // 1. COLLEGAMENTO DELLA TABLEVIEW AL CATALOGO SINGLETON REALE
         if (songTableView != null) {
             songTableView.setItems(Catalogo.getInstance().getTracce());
+            songTableView.setPlaceholder(new Label("Nessuna traccia presente"));
         }
         
         singlePlaylistData = FXCollections.observableArrayList();
