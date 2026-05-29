@@ -16,11 +16,13 @@ class CatalogoTest {
     void setUp() {
         catalogo = Catalogo.getInstance();
         catalogo.svuota();
+        CatalogoPlaylist.getInstance().svuota();
     }
 
     @AfterEach
     void tearDown() {
         catalogo.svuota();
+        CatalogoPlaylist.getInstance().svuota();
     }
 
     @Test
@@ -100,5 +102,64 @@ class CatalogoTest {
     @Test
     void testCaricaDaFileSenzaFileNonCrasha() {
         assertDoesNotThrow(() -> catalogo.caricaDaFile());
+    }
+
+
+    @Test
+    void testRimuoviTracciaEliminaDalCatalogo() {
+        Traccia traccia = new Traccia(UUID.randomUUID().toString(), "Song A", "Artist A", "3:00", "Pop", 2020);
+
+        catalogo.aggiungiTraccia(traccia);
+        assertEquals(1, catalogo.getSize());
+
+        catalogo.rimuoviTraccia(traccia);
+
+        assertEquals(0, catalogo.getSize());
+        assertFalse(catalogo.getTracce().contains(traccia));
+    }
+
+    @Test
+    void testRimuoviTracciaNullLanciaEccezione() {
+        assertThrows(IllegalArgumentException.class, () -> catalogo.rimuoviTraccia(null));
+    }
+
+    @Test
+    void testRimuoviTracciaNonPresenteLanciaEccezione() {
+        Traccia traccia = new Traccia(UUID.randomUUID().toString(), "Song B", "Artist B", "4:00", "Rock", 2021);
+
+        assertThrows(IllegalArgumentException.class, () -> catalogo.rimuoviTraccia(traccia));
+    }
+
+    @Test
+    void testRimuoviTracciaEliminaAncheDaTutteLePlaylist() {
+        CatalogoPlaylist catalogoPlaylist = CatalogoPlaylist.getInstance();
+
+        Traccia tracciaDaRimuovere = new Traccia(UUID.randomUUID().toString(), "Song C", "Artist C", "3:30", "Pop", 2022);
+        Traccia altraTraccia = new Traccia(UUID.randomUUID().toString(), "Song D", "Artist D", "2:45", "Jazz", 2023);
+
+        Playlist playlist1 = new Playlist("Playlist 1");
+        Playlist playlist2 = new Playlist("Playlist 2");
+
+        catalogo.aggiungiTraccia(tracciaDaRimuovere);
+        catalogo.aggiungiTraccia(altraTraccia);
+
+        playlist1.aggiungiTraccia(tracciaDaRimuovere);
+        playlist1.aggiungiTraccia(altraTraccia);
+        playlist2.aggiungiTraccia(tracciaDaRimuovere);
+
+        catalogoPlaylist.aggiungiPlaylist(playlist1);
+        catalogoPlaylist.aggiungiPlaylist(playlist2);
+
+        catalogo.rimuoviTraccia(tracciaDaRimuovere);
+
+        assertFalse(catalogo.getTracce().contains(tracciaDaRimuovere));
+
+        assertFalse(playlist1.getTracce().contains(tracciaDaRimuovere));
+        assertFalse(playlist2.getTracce().contains(tracciaDaRimuovere));
+
+        assertFalse(playlist1.getIdTracce().contains(tracciaDaRimuovere.getId()));
+        assertFalse(playlist2.getIdTracce().contains(tracciaDaRimuovere.getId()));
+
+        assertTrue(playlist1.getTracce().contains(altraTraccia));
     }
 }
