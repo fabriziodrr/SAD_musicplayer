@@ -17,6 +17,9 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
 
 <BorderPane minHeight="540.0" minWidth="820.0" prefHeight="700.0" prefWidth="1120.0" styleClass="app-shell" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unisa.musicplayer.ui.PrimaryController">
    <padding>
@@ -153,39 +156,63 @@
    </center>
 
    <right>
-      <VBox alignment="CENTER" minWidth="185.0" prefWidth="235.0" spacing="16.0" styleClass="surface" BorderPane.alignment="CENTER">
-         <children>
-            <StackPane maxHeight="170.0" maxWidth="170.0" minHeight="120.0" minWidth="120.0" prefHeight="155.0" prefWidth="155.0" styleClass="album-art">
-               <children>
-                  <Label styleClass="small-label" text="Copertina" />
-               </children>
-            </StackPane>
-            <VBox alignment="CENTER" spacing="3.0">
-               <children>
-                  <Label fx:id="currentTrackLabel" alignment="CENTER" maxWidth="190.0" styleClass="current-track-title" text="Seleziona un brano" textOverrun="ELLIPSIS" />
-                  <Label styleClass="small-label" text="- -" />
-               </children>
-            </VBox>
-            <HBox alignment="CENTER" spacing="7.0">
-               <children>
-                  <Label styleClass="small-label" text="0:00" />
-                  <Slider prefWidth="120.0" HBox.hgrow="ALWAYS" />
-                  <Label styleClass="small-label" text="0:00" />
-               </children>
-            </HBox>
-            <HBox alignment="CENTER" spacing="12.0">
-               <children>
-                  <Button fx:id="trackShuffleButton" mnemonicParsing="false" styleClass="player-control-button" text="🔀" />
-                  <Button mnemonicParsing="false" styleClass="player-control-button" text="⏮" />
-                  <Button maxHeight="36.0" maxWidth="36.0" minHeight="36.0" minWidth="36.0" mnemonicParsing="false" styleClass="primary-player-button" text="▶" />
-                  <Button mnemonicParsing="false" styleClass="player-control-button" text="⏭" />
-                  <Button fx:id="trackLoopButton" mnemonicParsing="false" styleClass="player-control-button" text="🔁" />
-               </children>
-            </HBox>
-         </children>
-         <padding>
-            <Insets bottom="20.0" left="14.0" right="14.0" top="20.0" />
-         </padding>
-      </VBox>
-   </right>
+   <VBox alignment="CENTER" minWidth="185.0" prefWidth="235.0" spacing="16.0" styleClass="surface" BorderPane.alignment="CENTER">
+      <children>
+         <!-- Copertina -->
+         <ImageView fx:id="copertina" fitHeight="155.0" fitWidth="155.0" preserveRatio="true" visible="false">
+   <image>
+      <Image url="@/icons/copertina.png" />
+   </image>
+</ImageView>
+
+         <!-- Nome traccia e autore -->
+         <VBox alignment="CENTER" spacing="3.0">
+            <children>
+               <Label fx:id="currentTrackLabel" alignment="CENTER" maxWidth="190.0" styleClass="current-track-title" text="Seleziona un brano" textOverrun="ELLIPSIS" />
+               <Label fx:id="labelAutoreTraccia" styleClass="small-label" text="" />
+            </children>
+         </VBox>
+
+         <!-- Barra progresso con tempo -->
+         <HBox alignment="CENTER" spacing="7.0">
+            <children>
+               <Label fx:id="labelTempoTrascorso" styleClass="small-label" text="0:00" />
+               <ProgressBar fx:id="barraProgresso" prefWidth="120.0" progress="0.0" style="-fx-accent: #1DB954;" HBox.hgrow="ALWAYS" />
+               <Label fx:id="labelDurataTotale" styleClass="small-label" text="0:00" />
+            </children>
+         </HBox>
+
+         <!-- Bottoni player -->
+         <HBox alignment="CENTER" spacing="12.0">
+            <children>
+               <Button fx:id="trackShuffleButton" mnemonicParsing="false" styleClass="player-control-button" text="🔀" />
+              
+               <Button fx:id="btnPrecedente" mnemonicParsing="false" styleClass="player-control-button">
+            <graphic>
+              <ImageView fitHeight="18.0" fitWidth="18.0" rotate="180.0">
+               <image>
+                 <Image url="@/icons/skip4.png" />
+               </image>
+      </ImageView>
+   </graphic>
+            </Button>
+               <Button fx:id="btnPlay" maxHeight="36.0" maxWidth="36.0" minHeight="36.0" minWidth="36.0" mnemonicParsing="false" styleClass="primary-player-button" text="▶" />
+               <Button fx:id="btnSkip" mnemonicParsing="false" styleClass="player-control-button">
+                 <graphic>
+               <ImageView fitHeight="20.0" fitWidth="20.0">
+                 <image>
+                   <Image url="@/icons/skip4.png" />
+                 </image>
+               </ImageView>
+                 </graphic>
+            </Button>
+               <Button fx:id="trackLoopButton" mnemonicParsing="false" styleClass="player-control-button" text="🔁" />
+            </children>
+         </HBox>
+      </children>
+      <padding>
+         <Insets bottom="20.0" left="14.0" right="14.0" top="20.0" />
+      </padding>
+   </VBox>
+</right>
 </BorderPane>
