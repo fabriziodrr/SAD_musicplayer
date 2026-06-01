@@ -7,13 +7,18 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.VBox?>
 
-<DialogPane style="-fx-background-color: #121212; -fx-border-color: #282828; -fx-border-radius: 8px; -fx-background-radius: 8px;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unisa.musicplayer.ui.NewPlaylistController">
+<DialogPane prefWidth="360.0" styleClass="dialog-pane" stylesheets="@../css/app.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unisa.musicplayer.ui.NewPlaylistController">
    <content>
-      <VBox spacing="15.0" style="-fx-background-color: transparent;">
+      <VBox spacing="14.0">
          <children>
-            <Label style="-fx-font-family: 'Segoe UI'; -fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #FFFFFF;" text="Nuova Playlist" />
-            <Label style="-fx-font-family: 'Segoe UI'; -fx-text-fill: #B3B3B3; -fx-font-size: 12px;" text="Inserisci il nome della playlist:" />
-            <TextField fx:id="txtNomePlaylist" promptText="Nome playlist..." style="-fx-background-color: #242424; -fx-text-fill: #FFFFFF; -fx-background-radius: 4px; -fx-border-color: #3E3E3E; -fx-border-radius: 4px;" />
+            <VBox spacing="4.0">
+               <children>
+                  <Label styleClass="dialog-title" text="Nuova Playlist" />
+                  <Label styleClass="small-label" text="Dai un nome alla playlist. I duplicati vengono bloccati automaticamente." />
+               </children>
+            </VBox>
+            <Label styleClass="form-label" text="Nome playlist" />
+            <TextField fx:id="txtNomePlaylist" promptText="Nome playlist..." />
          </children>
       </VBox>
    </content>
@@ -22,6 +27,6 @@
       <ButtonType fx:constant="CANCEL" />
    </buttonTypes>
    <padding>
-      <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+      <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
    </padding>
 </DialogPane>
