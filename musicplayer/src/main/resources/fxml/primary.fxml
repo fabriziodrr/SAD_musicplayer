@@ -72,6 +72,7 @@
                               <HBox alignment="CENTER_RIGHT" spacing="8.0">
                                  <children>
                                     <Button fx:id="btnOpenMockDialog" mnemonicParsing="false" styleClass="pill-button" text="+ Aggiungi" />
+                                    <Button fx:id="btnAddToPlaylist" mnemonicParsing="false" styleClass="pill-button" text="+ In playlist" />
                                     <Button fx:id="btnEditTrack" mnemonicParsing="false" styleClass="pill-button" text="✏ Modifica" />
                                     <Button fx:id="btnRemoveTrack" mnemonicParsing="false" styleClass="pill-button, danger-button" text="✕ Rimuovi" />
                                  </children>

@@ -14,8 +14,9 @@ public class PrimaryController {
     @FXML private Button btnOpenMockDialog;
     
     // Ora è perfettamente mappato sull'id dell'FXML modificato
-    @FXML private Button btnEditTrack; 
+    @FXML private Button btnEditTrack;
     @FXML private Button btnRemoveTrack;
+    @FXML private Button btnAddToPlaylist;
     @FXML private Button createNewPlaylistButton;
 
     // Elementi di testo, etichette e liste
@@ -40,6 +41,7 @@ public class PrimaryController {
         if (songTableView != null) {
             songTableView.setItems(Catalogo.getInstance().getTracce());
             songTableView.setPlaceholder(new Label("Nessuna traccia presente"));
+            songTableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         }
 
         // 2. CONFIGURAZIONE DELLE COLONNE CON I GETTER DELLA CLASSE TRACCIA
@@ -282,6 +284,11 @@ public class PrimaryController {
             });
         }
 
+        // 8B. INTERFACCIA DI AGGIUNTA BRANI A PLAYLIST (US-07)
+        if (btnAddToPlaylist != null) {
+            btnAddToPlaylist.setOnAction(e -> onAggiungiTracciaPlaylist());
+        }
+
         // 9. INTERFACCIA DI RIMOZIONE BRANO DAL CATALOGO (US-05)
         if (btnRemoveTrack != null) {
             btnRemoveTrack.setOnAction(e -> {
@@ -329,4 +336,89 @@ public class PrimaryController {
         }
 
     }
+
+    private void onAggiungiTracciaPlaylist() {
+        java.util.List<Traccia> tracceSelezionate =
+                new java.util.ArrayList<>(songTableView.getSelectionModel().getSelectedItems());
+
+        if (tracceSelezionate.isEmpty()) {
+            Alert alert = new Alert(
+                    Alert.AlertType.WARNING,
+                    "Seleziona almeno una traccia dal catalogo prima di aggiungerla a una playlist."
+            );
+            alert.setTitle("Nessuna traccia selezionata");
+            alert.setHeaderText(null);
+            alert.showAndWait();
+            return;
+        }
+
+        if (CatalogoPlaylist.getInstance().getPlaylists().isEmpty()) {
+            Alert alert = new Alert(
+                    Alert.AlertType.WARNING,
+                    "Non esiste ancora nessuna playlist. Crea prima una playlist."
+            );
+            alert.setTitle("Nessuna playlist disponibile");
+            alert.setHeaderText(null);
+            alert.showAndWait();
+            return;
+        }
+
+        ChoiceDialog<Playlist> dialog = new ChoiceDialog<>(
+                CatalogoPlaylist.getInstance().getPlaylists().get(0),
+                CatalogoPlaylist.getInstance().getPlaylists()
+        );
+
+        dialog.setTitle("Aggiungi a playlist");
+        dialog.setHeaderText("Scegli la playlist di destinazione");
+        dialog.setContentText("Playlist:");
+
+        java.util.Optional<Playlist> risultato = dialog.showAndWait();
+
+        if (risultato.isEmpty()) {
+            return;
+        }
+
+        Playlist playlistScelta = risultato.get();
+        int numeroTraccePrima = playlistScelta.getNumeroTracce();
+
+        for (Traccia traccia : tracceSelezionate) {
+            playlistScelta.aggiungiTraccia(traccia);
+        }
+
+        CatalogoPlaylist.getInstance().eseguiSalvataggioAutomatico();
+
+        if (sidebarListView != null) {
+            sidebarListView.refresh();
+        }
+
+        if (songTableView != null) {
+            songTableView.refresh();
+            songTableView.getSelectionModel().clearSelection();
+        }
+
+        int numeroTracceAggiunte = playlistScelta.getNumeroTracce() - numeroTraccePrima;
+
+        Alert conferma = new Alert(Alert.AlertType.INFORMATION);
+        conferma.setTitle("Aggiunta completata");
+        conferma.setHeaderText(null);
+
+        if (numeroTracceAggiunte == 0) {
+            conferma.setContentText(
+                    "Le tracce selezionate erano già presenti nella playlist \"" +
+                            playlistScelta.getNome() + "\"."
+            );
+        } else if (numeroTracceAggiunte == 1) {
+            conferma.setContentText(
+                    "1 traccia aggiunta alla playlist \"" + playlistScelta.getNome() + "\"."
+            );
+        } else {
+            conferma.setContentText(
+                    numeroTracceAggiunte + " tracce aggiunte alla playlist \"" +
+                            playlistScelta.getNome() + "\"."
+            );
+        }
+
+        conferma.showAndWait();
+    }
+
 }
