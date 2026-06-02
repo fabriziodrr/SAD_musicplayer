@@ -15,6 +15,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
@@ -589,6 +590,17 @@ songTableView.setRowFactory(tv -> {
         }
 
         if (songTableView != null) {
+            Playlist playlistSelezionata = sidebarListView != null
+                    ? sidebarListView.getSelectionModel().getSelectedItem()
+                    : null;
+
+            if (playlistScelta.equals(playlistSelezionata)) {
+                songTableView.setItems(playlistScelta.getTracce());
+                if (catalogTitleLabel != null) {
+                    catalogTitleLabel.setText("Playlist: " + playlistScelta.getNome());
+                }
+            }
+
             songTableView.refresh();
             songTableView.getSelectionModel().clearSelection();
         }

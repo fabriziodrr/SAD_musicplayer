@@ -2,6 +2,7 @@ package it.unisa.musicplayer.modello;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Playlist {
 
     private String nome;
@@ -74,6 +76,7 @@ public class Playlist {
         }
     }
 
+    @JsonIgnore
     public int getNumeroTracce() {
         return tracce.size();
     }
