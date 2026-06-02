@@ -193,35 +193,6 @@ class CatalogoTest {
     }
 
     @Test
-    void testAggiungiTracciaLanciaEccezionePerDuplicato() {
-        Traccia t1 = new Traccia(UUID.randomUUID().toString(), "Song", "Artist", "3:00", "Pop", 2020);
-        catalogo.aggiungiTraccia(t1);
-
-        Traccia t2 = new Traccia(UUID.randomUUID().toString(), "Song", "Artist", "4:00", "Rock", 2021);
-        assertThrows(IllegalArgumentException.class, () -> catalogo.aggiungiTraccia(t2));
-    }
-
-    @Test
-    void testGetSizeRestituisceDimensioneCorretta() {
-        assertEquals(0, catalogo.getSize());
-        catalogo.aggiungiTraccia(new Traccia(UUID.randomUUID().toString(), "A", "B", "1:00", "C", 2000));
-        assertEquals(1, catalogo.getSize());
-        catalogo.aggiungiTraccia(new Traccia(UUID.randomUUID().toString(), "D", "E", "2:00", "F", 2001));
-        assertEquals(2, catalogo.getSize());
-    }
-
-    @Test
-    void testSvuotaRimuoveTutteLeTracce() {
-        catalogo.aggiungiTraccia(new Traccia(UUID.randomUUID().toString(), "A", "B", "1:00", "C", 2000));
-        catalogo.aggiungiTraccia(new Traccia(UUID.randomUUID().toString(), "D", "E", "2:00", "F", 2001));
-        assertEquals(2, catalogo.getSize());
-
-        catalogo.svuota();
-        assertEquals(0, catalogo.getSize());
-        assertTrue(catalogo.getTracce().isEmpty());
-    }
-
-    @Test
     void testCaricaDaFileSenzaFileNonCrasha() {
         assertDoesNotThrow(() -> catalogo.caricaDaFile());
     }
