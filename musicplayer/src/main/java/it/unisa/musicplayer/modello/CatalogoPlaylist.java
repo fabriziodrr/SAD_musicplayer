@@ -72,6 +72,25 @@ public class CatalogoPlaylist {
         playlists.removeIf(p -> p.getNome().equalsIgnoreCase(nome));
     }
 
+    public void rimuoviTracciaDaTutte(Traccia traccia) {
+        if (traccia == null) {
+            throw new IllegalArgumentException("La traccia da rimuovere non può essere null");
+        }
+
+        boolean tracciaRimossa = false;
+
+        for (Playlist playlist : playlists) {
+            if (playlist.getIdTracce().contains(traccia.getId())) {
+                playlist.rimuoviTraccia(traccia);
+                tracciaRimossa = true;
+            }
+        }
+
+        if (tracciaRimossa) {
+            eseguiSalvataggioAutomatico();
+        }
+    }
+
     public int getSize() {
         return playlists.size();
     }

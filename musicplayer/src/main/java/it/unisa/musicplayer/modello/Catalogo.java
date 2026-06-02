@@ -117,7 +117,16 @@ public class Catalogo {
      * FLUSSO DI RIMOZIONE
      */
     public void rimuoviTraccia(Traccia t) {
+        if (t == null) {
+            throw new IllegalArgumentException("La traccia da rimuovere non può essere null");
+        }
 
+        if (!tracce.contains(t)) {
+            throw new IllegalArgumentException("La traccia da rimuovere non è presente nel catalogo");
+        }
+
+        CatalogoPlaylist.getInstance().rimuoviTracciaDaTutte(t);
+        tracce.remove(t);
     }
 
     // ── Ricerca e Controllo UML ───────────────────────────────────────────────

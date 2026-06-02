@@ -17,9 +17,12 @@ public class Main extends Application {
         CatalogoPlaylist.getInstance().caricaDaFile();
 
         FXMLLoader loader = new FXMLLoader(Main.class.getResource("/fxml/primary.fxml"));
-        Scene scene = new Scene(loader.load(), 900, 600);
+        Scene scene = new Scene(loader.load(), 1120, 700);
+        scene.getStylesheets().add(Main.class.getResource("/css/app.css").toExternalForm());
 
         stage.setTitle("Music Playlist Manager");
+        stage.setMinWidth(820);
+        stage.setMinHeight(540);
         stage.setScene(scene);
         stage.show();
     }

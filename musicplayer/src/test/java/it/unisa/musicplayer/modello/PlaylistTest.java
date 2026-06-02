@@ -103,4 +103,55 @@ class PlaylistTest {
         p.aggiungiTraccia(t);
         assertEquals(1, p.getNumeroTracce());
     }
+
+    @Test
+    void testUS07AggiungiTracciaAllaPlaylist() {
+        Playlist playlist = new Playlist("Playlist Test");
+        Traccia traccia = new Traccia(
+                java.util.UUID.randomUUID().toString(),
+                "Titolo Test",
+                "Autore Test",
+                "3:30",
+                "Pop",
+                2024
+        );
+
+        playlist.aggiungiTraccia(traccia);
+
+        assertEquals(1, playlist.getNumeroTracce());
+        assertTrue(playlist.getTracce().contains(traccia));
+        assertTrue(playlist.getIdTracce().contains(traccia.getId()));
+    }
+
+    @Test
+    void testUS07StessaTracciaInPlaylistDiverse() {
+        Playlist playlist1 = new Playlist("Playlist 1");
+        Playlist playlist2 = new Playlist("Playlist 2");
+
+        Traccia traccia = new Traccia(
+                java.util.UUID.randomUUID().toString(),
+                "Brano Condiviso",
+                "Autore",
+                "4:00",
+                "Rock",
+                2023
+        );
+
+        playlist1.aggiungiTraccia(traccia);
+        playlist2.aggiungiTraccia(traccia);
+
+        assertEquals(1, playlist1.getNumeroTracce());
+        assertEquals(1, playlist2.getNumeroTracce());
+
+        assertTrue(playlist1.getTracce().contains(traccia));
+        assertTrue(playlist2.getTracce().contains(traccia));
+    }
+
+    @Test
+    void testUS07AggiungiTracciaNullLanciaEccezione() {
+        Playlist playlist = new Playlist("Playlist Test");
+
+        assertThrows(NullPointerException.class, () -> playlist.aggiungiTraccia(null));
+    }
+
 }

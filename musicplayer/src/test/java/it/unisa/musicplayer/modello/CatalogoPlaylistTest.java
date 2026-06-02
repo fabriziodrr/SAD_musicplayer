@@ -103,4 +103,37 @@ class CatalogoPlaylistTest {
         assertEquals(0, catalogoPlaylist.getSize());
         assertTrue(catalogoPlaylist.getPlaylists().isEmpty());
     }
+
+
+    @Test
+    void testRimuoviTracciaDaTutteRimuoveLaTracciaDaTutteLePlaylist() {
+        Traccia traccia = new Traccia(UUID.randomUUID().toString(), "Song X", "Artist X", "3:10", "Pop", 2020);
+        Traccia altraTraccia = new Traccia(UUID.randomUUID().toString(), "Song Y", "Artist Y", "4:20", "Rock", 2021);
+
+        Playlist playlist1 = new Playlist("Playlist A");
+        Playlist playlist2 = new Playlist("Playlist B");
+
+        playlist1.aggiungiTraccia(traccia);
+        playlist1.aggiungiTraccia(altraTraccia);
+        playlist2.aggiungiTraccia(traccia);
+
+        catalogoPlaylist.aggiungiPlaylist(playlist1);
+        catalogoPlaylist.aggiungiPlaylist(playlist2);
+
+        catalogoPlaylist.rimuoviTracciaDaTutte(traccia);
+
+        assertFalse(playlist1.getTracce().contains(traccia));
+        assertFalse(playlist2.getTracce().contains(traccia));
+
+        assertFalse(playlist1.getIdTracce().contains(traccia.getId()));
+        assertFalse(playlist2.getIdTracce().contains(traccia.getId()));
+
+        assertTrue(playlist1.getTracce().contains(altraTraccia));
+    }
+
+    @Test
+    void testRimuoviTracciaDaTutteConNullLanciaEccezione() {
+        assertThrows(IllegalArgumentException.class, () -> catalogoPlaylist.rimuoviTracciaDaTutte(null));
+    }
+
 }
