@@ -36,6 +36,7 @@ public class PrimaryController {
     @FXML private Button btnNavHome;
     @FXML private Button btnNavStats;
     @FXML private Button btnOpenMockDialog;
+    @FXML private Button mainPlaylistPlayButton;
     
     // Ora è perfettamente mappato sull'id dell'FXML modificato
     @FXML private Button btnEditTrack;
@@ -72,6 +73,7 @@ public class PrimaryController {
 
     private it.unisa.musicplayer.servizi.Lettore lettore;
     private javafx.animation.Timeline timer;
+    private Playlist playlistCorrenteUi;
     
     @FXML
     public void initialize() {
@@ -229,10 +231,30 @@ if (btnPlay != null) {
             btnPlay.setText("▶");
             timer.pause();
         } else {
-            if (lettore.getTracciaCorrente() == null) return;
-            lettore.play();
-            btnPlay.setText("||");
-            timer.play();
+            if (lettore.getTracciaCorrente() == null) {
+                Traccia tracciaDaAvviare = songTableView.getSelectionModel().getSelectedItem();
+                if (tracciaDaAvviare == null && !songTableView.getItems().isEmpty()) {
+                    tracciaDaAvviare = songTableView.getItems().get(0);
+                }
+                if (tracciaDaAvviare == null) return;
+                avviaRiproduzioneDaTraccia(tracciaDaAvviare);
+            } else {
+                lettore.play();
+                btnPlay.setText("||");
+                timer.play();
+            }
+        }
+    });
+}
+
+if (mainPlaylistPlayButton != null) {
+    mainPlaylistPlayButton.setOnAction(e -> {
+        Traccia tracciaDaAvviare = songTableView.getSelectionModel().getSelectedItem();
+        if (tracciaDaAvviare == null && !songTableView.getItems().isEmpty()) {
+            tracciaDaAvviare = songTableView.getItems().get(0);
+        }
+        if (tracciaDaAvviare != null) {
+            avviaRiproduzioneDaTraccia(tracciaDaAvviare);
         }
     });
 }
@@ -315,13 +337,7 @@ songTableView.setRowFactory(tv -> {
         if (event.getClickCount() == 2 && !row.isEmpty()) {
             Traccia cliccata = row.getItem();
             if (cliccata != null) {
-                List<Traccia> tutteLeTracce = new ArrayList<>(Catalogo.getInstance().getTracce());
-                lettore.aggiornaCodeTracce(tutteLeTracce);
-                lettore.tracciaCorrenteProperty().set(cliccata);
-                lettore.play();
-                timer.play();
-                btnPlay.setText("||");
-                cliccata.incrementaRiproduzioni();
+                avviaRiproduzioneDaTraccia(cliccata);
             }
         }
     });
@@ -336,6 +352,8 @@ songTableView.setRowFactory(tv -> {
                 btnNavStats.setStyle("-fx-background-color: transparent; -fx-text-fill: #B3B3B3;");
                 if (catalogTitleLabel != null) catalogTitleLabel.setText("Catalogo Globale");
                 if (songTableView != null) songTableView.setItems(Catalogo.getInstance().getTracce());
+                playlistCorrenteUi = null;
+                if (sidebarListView != null) sidebarListView.getSelectionModel().clearSelection();
             });
         }
 
@@ -358,6 +376,8 @@ songTableView.setRowFactory(tv -> {
                     btnNavStats.setStyle("-fx-background-color: transparent; -fx-text-fill: #B3B3B3;");
                     if (catalogTitleLabel != null) catalogTitleLabel.setText("Playlist: " + newVal.getNome());
                     if (songTableView != null) songTableView.setItems(newVal.getTracce());
+                    playlistCorrenteUi = newVal;
+                    lettore.sincronizzaConPlaylist(newVal);
                 }
             });
         }
@@ -628,6 +648,28 @@ songTableView.setRowFactory(tv -> {
         }
 
         conferma.showAndWait();
+    }
+
+    private void avviaRiproduzioneDaTraccia(Traccia traccia) {
+        if (traccia == null || songTableView == null || songTableView.getItems().isEmpty()) {
+            return;
+        }
+
+        if (playlistCorrenteUi != null) {
+            lettore.sincronizzaConPlaylist(playlistCorrenteUi);
+        } else {
+            lettore.aggiornaCodeTracce(new ArrayList<>(songTableView.getItems()));
+        }
+
+        lettore.tracciaCorrenteProperty().set(traccia);
+        lettore.play();
+        timer.play();
+
+        if (btnPlay != null) {
+            btnPlay.setText("||");
+        }
+
+        traccia.incrementaRiproduzioni();
     }
 
 }

@@ -82,6 +82,18 @@ class PlaylistModificaDuranteRiproduzioneTest {
         assertEquals(traccia1, lettore.getTracciaCorrente());
     }
 
+    @Test
+    void task1202AggiuntaTracciaAllaPlaylistCorrenteVieneAccodataNelLettore() {
+        lettore.sincronizzaConPlaylist(playlist);
+        lettore.play();
+
+        playlist.aggiungiTraccia(traccia3);
+
+        assertEquals(List.of(traccia1, traccia2, traccia3), lettore.getCoda());
+        assertEquals(StatoLettore.PLAYING, lettore.getStato());
+        assertEquals(traccia1, lettore.getTracciaCorrente());
+    }
+
     private Traccia creaTraccia(String titolo) {
         return new Traccia(UUID.randomUUID().toString(), titolo, "Autore", "3:00", "Pop", 2024);
     }

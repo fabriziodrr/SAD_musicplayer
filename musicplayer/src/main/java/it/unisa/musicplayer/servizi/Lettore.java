@@ -3,18 +3,21 @@ package it.unisa.musicplayer.servizi;
 import java.util.ArrayList;
 import java.util.List;
 
+import it.unisa.musicplayer.modello.Playlist;
 import it.unisa.musicplayer.modello.Traccia;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.ListChangeListener;
 
 public class Lettore {
 
     private StatoLettore stato;
     private List<Traccia> coda;
     private ModalitaRiproduzione modalita;
-    private int tempoTrascorsoInt;
+    private Playlist playlistCorrente;
+    private ListChangeListener<Traccia> listenerPlaylistCorrente;
 
     // JavaFX Properties per binding con UI
     private final ObjectProperty<Traccia> tracciaCorrente = new SimpleObjectProperty<>();
@@ -67,6 +70,32 @@ public class Lettore {
         this.coda = new ArrayList<>(tracce);
         tempoTrascorso.set(0);
         tracciaCorrente.set(coda.isEmpty() ? null : coda.get(0));
+    }
+
+    public void sincronizzaConPlaylist(Playlist playlist) {
+        if (playlist == null) {
+            throw new IllegalArgumentException("La playlist da sincronizzare non può essere null");
+        }
+
+        if (playlistCorrente != null && listenerPlaylistCorrente != null) {
+            playlistCorrente.getTracce().removeListener(listenerPlaylistCorrente);
+        }
+
+        playlistCorrente = playlist;
+        coda = new ArrayList<>(playlist.getTracce());
+        if (tracciaCorrente.get() == null && !coda.isEmpty()) {
+            tracciaCorrente.set(coda.get(0));
+        }
+
+        listenerPlaylistCorrente = change -> {
+            while (change.next()) {
+                if (change.wasAdded()) {
+                    coda.addAll(change.getAddedSubList());
+                }
+            }
+        };
+
+        playlistCorrente.getTracce().addListener(listenerPlaylistCorrente);
     }
 
     public void setModalita(ModalitaRiproduzione modalita) {
