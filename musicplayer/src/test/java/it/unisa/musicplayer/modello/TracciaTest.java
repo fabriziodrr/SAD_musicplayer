@@ -5,8 +5,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import it.unisa.musicplayer.modello.Traccia;
-import it.unisa.musicplayer.modello.Tag;
 
 import java.util.Set;
 
