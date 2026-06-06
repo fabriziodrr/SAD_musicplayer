@@ -257,3 +257,34 @@
     -fx-background-color: #3a3a3a;
     -fx-background-radius: 999;
 }
+.playlist-mode-button {
+    -fx-background-color: #242424;
+    -fx-text-fill: #b3b3b3;
+    -fx-background-radius: 19px;
+    -fx-border-radius: 19px;
+    -fx-border-color: transparent;
+    -fx-border-width: 1px;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-padding: 0;
+    -fx-cursor: hand;
+}
+
+.playlist-mode-button:hover {
+    -fx-background-color: #353535;
+    -fx-text-fill: #ffffff;
+}
+
+.playlist-mode-button:selected {
+    -fx-background-color: #1db954;
+    -fx-text-fill: #000000;
+    -fx-border-color: #7cf5a5;
+    -fx-effect: dropshadow(
+        gaussian,
+        rgba(29, 185, 84, 0.60),
+        11,
+        0.25,
+        0,
+        0
+    );
+}

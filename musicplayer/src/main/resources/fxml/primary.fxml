@@ -20,6 +20,8 @@
 <?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.image.Image?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.Tooltip?>
 
 <BorderPane minHeight="540.0" minWidth="820.0" prefHeight="700.0" prefWidth="1120.0" styleClass="app-shell" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unisa.musicplayer.ui.PrimaryController">
    <padding>
@@ -80,6 +82,64 @@
                                     <Button fx:id="btnRemoveTrack" mnemonicParsing="false" styleClass="pill-button, danger-button" text="✕ Rimuovi" />
                                  </children>
                               </HBox>
+                           </children>
+                        </HBox>
+
+                        <!-- Modalità di riproduzione della playlist - US-10 -->
+                        <HBox fx:id="playlistModeControls"
+                              alignment="CENTER_LEFT"
+                              managed="false"
+                              spacing="8.0"
+                              visible="false">
+
+                           <children>
+                              <ToggleButton fx:id="btnPlaylistSequenziale"
+                                            accessibleText="Modalità sequenziale"
+                                            maxHeight="38.0"
+                                            maxWidth="38.0"
+                                            minHeight="38.0"
+                                            minWidth="38.0"
+                                            mnemonicParsing="false"
+                                            prefHeight="38.0"
+                                            prefWidth="38.0"
+                                            styleClass="player-control-button, playlist-mode-button"
+                                            text="→">
+                                 <tooltip>
+                                    <Tooltip text="Sequenziale" />
+                                 </tooltip>
+                              </ToggleButton>
+
+                              <ToggleButton fx:id="btnPlaylistLoop"
+                                            accessibleText="Modalità loop"
+                                            maxHeight="38.0"
+                                            maxWidth="38.0"
+                                            minHeight="38.0"
+                                            minWidth="38.0"
+                                            mnemonicParsing="false"
+                                            prefHeight="38.0"
+                                            prefWidth="38.0"
+                                            styleClass="player-control-button, playlist-mode-button"
+                                            text="↻">
+                                 <tooltip>
+                                    <Tooltip text="Loop" />
+                                 </tooltip>
+                              </ToggleButton>
+
+                              <ToggleButton fx:id="btnPlaylistShuffle"
+                                            accessibleText="Modalità shuffle"
+                                            maxHeight="38.0"
+                                            maxWidth="38.0"
+                                            minHeight="38.0"
+                                            minWidth="38.0"
+                                            mnemonicParsing="false"
+                                            prefHeight="38.0"
+                                            prefWidth="38.0"
+                                            styleClass="player-control-button, playlist-mode-button"
+                                            text="🔀">
+                                 <tooltip>
+                                    <Tooltip text="Shuffle" />
+                                 </tooltip>
+                              </ToggleButton>
                            </children>
                         </HBox>
 
