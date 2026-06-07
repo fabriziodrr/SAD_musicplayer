@@ -94,6 +94,72 @@ class PlaylistModificaDuranteRiproduzioneTest {
         assertEquals(traccia1, lettore.getTracciaCorrente());
     }
 
+    @Test
+    void task1203RimozioneTracciaNonCorrenteDurantePlaying() {
+        playlist.aggiungiTraccia(traccia3);
+        lettore.sincronizzaConPlaylist(playlist);
+        lettore.play();
+
+        playlist.rimuoviTraccia(traccia2);
+
+        assertEquals(List.of(traccia1, traccia3), lettore.getCoda());
+        assertEquals(StatoLettore.PLAYING, lettore.getStato());
+        assertEquals(traccia1, lettore.getTracciaCorrente());
+    }
+
+    @Test
+    void task1203RimozioneTracciaCorrentePassaAllaSuccessiva() {
+        playlist.aggiungiTraccia(traccia3);
+        lettore.sincronizzaConPlaylist(playlist);
+        lettore.play();
+
+        playlist.rimuoviTraccia(traccia1);
+
+        assertEquals(List.of(traccia2, traccia3), lettore.getCoda());
+        assertEquals(StatoLettore.PLAYING, lettore.getStato());
+        assertEquals(traccia2, lettore.getTracciaCorrente());
+    }
+
+    @Test
+    void task1203RimozioneUnicaTracciaCorrenteFermaIlLettore() {
+        playlist.rimuoviTraccia(traccia2);
+        lettore.sincronizzaConPlaylist(playlist);
+        lettore.play();
+
+        playlist.rimuoviTraccia(traccia1);
+
+        assertTrue(lettore.getCoda().isEmpty());
+        assertEquals(StatoLettore.STOPPED, lettore.getStato());
+    }
+
+    @Test
+    void task1203RimozioneTracciaDurantePausedSincronizzata() {
+        playlist.aggiungiTraccia(traccia3);
+        lettore.sincronizzaConPlaylist(playlist);
+        lettore.play();
+        lettore.pausa();
+
+        playlist.rimuoviTraccia(traccia2);
+
+        assertEquals(List.of(traccia1, traccia3), lettore.getCoda());
+        assertEquals(StatoLettore.PAUSED, lettore.getStato());
+        assertEquals(traccia1, lettore.getTracciaCorrente());
+    }
+
+    @Test
+    void task1203RimozioneTracciaCorrenteDurantePausedPassaAllaSuccessiva() {
+        playlist.aggiungiTraccia(traccia3);
+        lettore.sincronizzaConPlaylist(playlist);
+        lettore.play();
+        lettore.pausa();
+
+        playlist.rimuoviTraccia(traccia1);
+
+        assertEquals(List.of(traccia2, traccia3), lettore.getCoda());
+        assertEquals(StatoLettore.PLAYING, lettore.getStato());
+        assertEquals(traccia2, lettore.getTracciaCorrente());
+    }
+
     private Traccia creaTraccia(String titolo) {
         return new Traccia(UUID.randomUUID().toString(), titolo, "Autore", "3:00", "Pop", 2024);
     }
