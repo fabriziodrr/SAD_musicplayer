@@ -92,6 +92,27 @@ public class Lettore {
                 if (change.wasAdded()) {
                     coda.addAll(change.getAddedSubList());
                 }
+                if (change.wasRemoved()) {
+                    List<? extends Traccia> rimosse = change.getRemoved();
+                    boolean correnteRimossa = false;
+                    for (Traccia rimossa : rimosse) {
+                        if (rimossa.equals(tracciaCorrente.get())) {
+                            correnteRimossa = true;
+                        }
+                    }
+                    coda.removeAll(rimosse);
+                    if (correnteRimossa) {
+                        tempoTrascorso.set(0);
+                        if (coda.isEmpty()) {
+                            tracciaCorrente.set(null);
+                            stato = StatoLettore.STOPPED;
+                        } else if (modalita != null) {
+                            Traccia prossima = modalita.prossimaTraccia(coda, tracciaCorrente.get());
+                            tracciaCorrente.set(prossima);
+                            stato = StatoLettore.PLAYING;
+                        }
+                    }
+                }
             }
         };
 
