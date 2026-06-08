@@ -255,4 +255,110 @@ class CatalogoTest {
 
         assertTrue(playlist1.getTracce().contains(altraTraccia));
     }
+
+    // ── 5. TEST AGGIORNAMENTO AUTOMATICO PLAYLIST AUTOMATICHE ─────────────────
+
+    @Test
+    void testAggiungiTracciaAggiornaPLaylistAutoPerAnnoCorrispondente() {
+        Playlist autoAnno = new Playlist("Auto - 2000");
+        CatalogoPlaylist.getInstance().aggiungiPlaylist(autoAnno);
+
+        Traccia t = new Traccia(UUID.randomUUID().toString(), "Test Song", "Test Artist", "3:00", "Pop", 2000);
+        catalogo.aggiungiTraccia(t);
+
+        assertTrue(autoAnno.getTracce().contains(t));
+        assertTrue(autoAnno.getIdTracce().contains(t.getId()));
+    }
+
+    @Test
+    void testAggiungiTracciaAggiornaPLaylistAutoPerGenereCorrispondente() {
+        Playlist autoGenere = new Playlist("Auto - Rock");
+        CatalogoPlaylist.getInstance().aggiungiPlaylist(autoGenere);
+
+        Traccia t = new Traccia(UUID.randomUUID().toString(), "Rock Song", "Rock Artist", "4:00", "Rock", 1990);
+        catalogo.aggiungiTraccia(t);
+
+        assertTrue(autoGenere.getTracce().contains(t));
+        assertTrue(autoGenere.getIdTracce().contains(t.getId()));
+    }
+
+    @Test
+    void testAggiungiTracciaAnnoNonCorrisponenteNonAggiornaPLaylistAuto() {
+        Playlist autoAnno = new Playlist("Auto - 1999");
+        CatalogoPlaylist.getInstance().aggiungiPlaylist(autoAnno);
+
+        Traccia t = new Traccia(UUID.randomUUID().toString(), "Another Song", "Another Artist", "3:30", "Pop", 2000);
+        catalogo.aggiungiTraccia(t);
+
+        assertFalse(autoAnno.getTracce().contains(t));
+        assertEquals(0, autoAnno.getNumeroTracce());
+    }
+
+    @Test
+    void testAggiungiTracciaGenereNonCorrisponenteNonAggiornaPLaylistAuto() {
+        Playlist autoGenere = new Playlist("Auto - Jazz");
+        CatalogoPlaylist.getInstance().aggiungiPlaylist(autoGenere);
+
+        Traccia t = new Traccia(UUID.randomUUID().toString(), "Pop Song", "Pop Artist", "3:00", "Pop", 2005);
+        catalogo.aggiungiTraccia(t);
+
+        assertFalse(autoGenere.getTracce().contains(t));
+        assertEquals(0, autoGenere.getNumeroTracce());
+    }
+
+    @Test
+    void testAggiungiTracciaConNessunaPlaylistAutoNonGeneraEccezioni() {
+        Traccia t = new Traccia(UUID.randomUUID().toString(), "Solo Song", "Solo Artist", "3:00", "Pop", 2010);
+        assertDoesNotThrow(() -> catalogo.aggiungiTraccia(t));
+        assertEquals(1, catalogo.getSize());
+    }
+
+    @Test
+    void testAggiungiTracciaNoAggiornamentoPlaylistNonAuto() {
+        Playlist manuale = new Playlist("La mia playlist");
+        CatalogoPlaylist.getInstance().aggiungiPlaylist(manuale);
+
+        Traccia t = new Traccia(UUID.randomUUID().toString(), "Manual Song", "Manual Artist", "3:00", "Rock", 2000);
+        catalogo.aggiungiTraccia(t);
+
+        assertFalse(manuale.getTracce().contains(t));
+        assertEquals(0, manuale.getNumeroTracce());
+    }
+
+    @Test
+    void testAggiungiTracciaGenereMatchCaseInsensitive() {
+        Playlist autoGenere = new Playlist("Auto - rock");
+        CatalogoPlaylist.getInstance().aggiungiPlaylist(autoGenere);
+
+        Traccia t = new Traccia(UUID.randomUUID().toString(), "Hard Rock Song", "Hard Artist", "5:00", "Rock", 1985);
+        catalogo.aggiungiTraccia(t);
+
+        assertTrue(autoGenere.getTracce().contains(t));
+    }
+
+    @Test
+    void testAggiungiTracciaAggiornaPiuPlaylistAutoSimultaneamente() {
+        Playlist autoAnno = new Playlist("Auto - 2000");
+        Playlist autoGenere = new Playlist("Auto - Pop");
+        CatalogoPlaylist.getInstance().aggiungiPlaylist(autoAnno);
+        CatalogoPlaylist.getInstance().aggiungiPlaylist(autoGenere);
+
+        Traccia t = new Traccia(UUID.randomUUID().toString(), "Pop 2000 Song", "Pop Artist", "3:00", "Pop", 2000);
+        catalogo.aggiungiTraccia(t);
+
+        assertTrue(autoAnno.getTracce().contains(t));
+        assertTrue(autoGenere.getTracce().contains(t));
+    }
+
+    @Test
+    void testAggiungiTracciaAutoNonAggiungeAllePlaylistConNomeSimileNonPrefissato() {
+        Playlist nonAuto = new Playlist("Automatica - 2000");
+        CatalogoPlaylist.getInstance().aggiungiPlaylist(nonAuto);
+
+        Traccia t = new Traccia(UUID.randomUUID().toString(), "Song 2000", "Artist", "3:00", "Pop", 2000);
+        catalogo.aggiungiTraccia(t);
+
+        assertFalse(nonAuto.getTracce().contains(t));
+        assertEquals(0, nonAuto.getNumeroTracce());
+    }
 }

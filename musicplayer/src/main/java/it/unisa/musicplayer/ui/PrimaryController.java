@@ -1,13 +1,17 @@
 package it.unisa.musicplayer.ui;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import it.unisa.musicplayer.modello.Catalogo;
 import it.unisa.musicplayer.modello.CatalogoPlaylist;
 import it.unisa.musicplayer.modello.Playlist;
 import it.unisa.musicplayer.modello.Tag;
 import it.unisa.musicplayer.modello.Traccia;
+import it.unisa.musicplayer.servizi.GeneratorePlaylistAutomatica;
 import it.unisa.musicplayer.servizi.Lettore;
 import it.unisa.musicplayer.servizi.Sequenziale;
 import it.unisa.musicplayer.servizi.StatoLettore;
@@ -42,6 +46,7 @@ public class PrimaryController {
     @FXML private Button btnRemoveTrack;
     @FXML private Button btnAddToPlaylist;
     @FXML private Button createNewPlaylistButton;
+    @FXML private Button btnGeneraPlaylistAuto;
 
     // Elementi di testo, etichette e liste
     @FXML private ListView<Playlist> sidebarListView;
@@ -392,6 +397,11 @@ songTableView.setRowFactory(tv -> {
             });
         }
 
+        // 5C. GENERAZIONE AUTOMATICA PLAYLIST (US)
+        if (btnGeneraPlaylistAuto != null) {
+            btnGeneraPlaylistAuto.setOnAction(e -> onGeneraPlaylistAutomatica());
+        }
+
         // 6. POPOLAMENTO STATISTICHE
         if (topTracksListView != null) {
             topTracksListView.getItems().clear(); 
@@ -628,6 +638,70 @@ songTableView.setRowFactory(tv -> {
         }
 
         conferma.showAndWait();
+    }
+
+    private void onGeneraPlaylistAutomatica() {
+        ChoiceDialog<String> criterioDialog = new ChoiceDialog<>("Per Genere", Arrays.asList("Per Genere", "Per Anno"));
+        criterioDialog.setTitle("Genera Playlist Automatica");
+        criterioDialog.setHeaderText("Scegli il criterio di generazione");
+        criterioDialog.setContentText("Filtra per:");
+
+        Optional<String> criterio = criterioDialog.showAndWait();
+        if (!criterio.isPresent()) return;
+
+        Catalogo catalogo = Catalogo.getInstance();
+        GeneratorePlaylistAutomatica generatore = new GeneratorePlaylistAutomatica();
+
+        if ("Per Genere".equals(criterio.get())) {
+            List<String> generi = catalogo.getTracce().stream()
+                    .map(Traccia::getGenere).distinct().sorted().collect(Collectors.toList());
+            if (generi.isEmpty()) {
+                new Alert(Alert.AlertType.WARNING, "Nessuna traccia nel catalogo.").showAndWait();
+                return;
+            }
+            ChoiceDialog<String> genereDialog = new ChoiceDialog<>(generi.get(0), generi);
+            genereDialog.setTitle("Genera per Genere");
+            genereDialog.setHeaderText("Seleziona il genere");
+            genereDialog.setContentText("Genere:");
+            Optional<String> genere = genereDialog.showAndWait();
+            if (!genere.isPresent()) return;
+            aggiungiPlaylistGenerata(generatore.generaPerGenere(catalogo, genere.get()));
+
+        } else {
+            List<Integer> anni = catalogo.getTracce().stream()
+                    .map(Traccia::getAnno).distinct().sorted().collect(Collectors.toList());
+            if (anni.isEmpty()) {
+                new Alert(Alert.AlertType.WARNING, "Nessuna traccia nel catalogo.").showAndWait();
+                return;
+            }
+            ChoiceDialog<Integer> annoDialog = new ChoiceDialog<>(anni.get(0), anni);
+            annoDialog.setTitle("Genera per Anno");
+            annoDialog.setHeaderText("Seleziona l'anno");
+            annoDialog.setContentText("Anno:");
+            Optional<Integer> anno = annoDialog.showAndWait();
+            if (!anno.isPresent()) return;
+            aggiungiPlaylistGenerata(generatore.generaPerAnno(catalogo, anno.get()));
+        }
+    }
+
+    private void aggiungiPlaylistGenerata(Playlist playlist) {
+        try {
+            CatalogoPlaylist.getInstance().aggiungiPlaylist(playlist);
+            Alert info = new Alert(Alert.AlertType.INFORMATION,
+                    "Playlist \"" + playlist.getNome() + "\" generata con " + playlist.getNumeroTracce() + " brani.");
+            info.setHeaderText(null);
+            info.showAndWait();
+        } catch (IllegalArgumentException ex) {
+            Alert conferma = new Alert(Alert.AlertType.CONFIRMATION);
+            conferma.setTitle("Playlist già esistente");
+            conferma.setHeaderText("Esiste già \"" + playlist.getNome() + "\"");
+            conferma.setContentText("Vuoi sovrascriverla con i dati aggiornati?");
+            Optional<ButtonType> r = conferma.showAndWait();
+            if (r.isPresent() && r.get() == ButtonType.OK) {
+                CatalogoPlaylist.getInstance().rimuoviPlaylist(playlist.getNome());
+                CatalogoPlaylist.getInstance().aggiungiPlaylist(playlist);
+            }
+        }
     }
 
 }

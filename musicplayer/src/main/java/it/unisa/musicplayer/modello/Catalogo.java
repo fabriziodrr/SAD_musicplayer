@@ -21,7 +21,6 @@ public class Catalogo {
     private Catalogo() {
         this.tracce = FXCollections.observableArrayList();
 
-        // AUTOMAZIONE TOTALE: Qualsiasi modifica alla lista salva le canzoni sul Desktop
         this.tracce.addListener((ListChangeListener<Traccia>) change -> {
             eseguiSalvataggioAutomatico();
         });
@@ -49,7 +48,6 @@ public class Catalogo {
         GestoreFile.esporta(pacchettoDati);
     }
 
-    //Carica i dati dal file JSON all'avvio dell'applicazione.
     public void caricaDaFile() {
         DatiApplicazione dati = GestoreFile.importa();
         if (dati.getCanzoni() != null && !dati.getCanzoni().isEmpty()) {
@@ -63,8 +61,6 @@ public class Catalogo {
         return tracce;
     }
 
-    // ── CRUD (Focalizzato su Aggiunta e Modifica) ─────────────────────────────
-
     /**
      * FLUSSO DI AGGIUNTA
      * Aggiunge una traccia al catalogo verificando preventivamente i duplicati.
@@ -73,14 +69,29 @@ public class Catalogo {
         if (t == null) {
             throw new IllegalArgumentException("La traccia non può essere null");
         }
-        // Utilizza il metodo esisteDuplicato come richiesto dall'UML [cite: 73]
+
         if (contiene(t.getTitolo(), t.getAutore())) {
             throw new IllegalArgumentException(
                 "Esiste già una traccia con titolo '" + t.getTitolo() +
                 "' e autore '" + t.getAutore() + "'");
         }
         tracce.add(t);
-        // Il salvataggio JSON parte da solo grazie al listener nel costruttore!
+        aggiornaPlaylistAutomatiche(t);
+    }
+
+    private void aggiornaPlaylistAutomatiche(Traccia t) {
+        final String PREFISSO = "Auto - ";
+        for (Playlist p : CatalogoPlaylist.getInstance().getPlaylists()) {
+            String nome = p.getNome();
+            if (!nome.startsWith(PREFISSO)) continue;
+            String criterio = nome.substring(PREFISSO.length());
+            try {
+                int anno = Integer.parseInt(criterio);
+                if (t.getAnno() == anno) p.aggiungiTraccia(t);
+            } catch (NumberFormatException e) {
+                if (criterio.equalsIgnoreCase(t.getGenere())) p.aggiungiTraccia(t);
+            }
+        }
     }
 
     /**
@@ -97,11 +108,11 @@ public class Catalogo {
             throw new IllegalArgumentException("La traccia da modificare non è presente nel catalogo");
         }
         
-        // CONTROLLO INTELIGENTE: Applica la verifica solo se l'utente ha cambiato Titolo o Autore
+        
         if (!vecchia.getTitolo().equalsIgnoreCase(nuova.getTitolo()) || 
             !vecchia.getAutore().equalsIgnoreCase(nuova.getAutore())) {
             
-            // Se la nuova combinazione esiste già in un altro brano, blocca e lancia l'errore
+            
             if (contiene(nuova.getTitolo(), nuova.getAutore())) {
                 throw new IllegalArgumentException(
                     "Impossibile modificare: esiste già un'altra traccia con titolo '" + nuova.getTitolo() +
@@ -110,7 +121,7 @@ public class Catalogo {
         }
         
         tracce.set(indice, nuova);
-        // Il salvataggio JSON parte da solo grazie al listener nel costruttore!
+        
     }
 
     /**
@@ -141,7 +152,7 @@ public class Catalogo {
     }
 
     /**
-     * Specifica esatta del metodo presente nel diagramma UML (Metodo: esisteDuplicato) [cite: 73]
+     * Specifica esatta del metodo presente nel diagramma UML (Metodo: esisteDuplicato)
      */
     public boolean contiene(String titolo, String autore) {
         for (Traccia t : tracce) {
