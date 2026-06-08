@@ -13,32 +13,32 @@ import it.unisa.musicplayer.modello.Tag;
 import it.unisa.musicplayer.modello.Traccia;
 import it.unisa.musicplayer.servizi.GeneratorePlaylistAutomatica;
 import it.unisa.musicplayer.servizi.Lettore;
-import it.unisa.musicplayer.servizi.Sequenziale;
-import it.unisa.musicplayer.servizi.StatoLettore;
 import it.unisa.musicplayer.servizi.Loop;
 import it.unisa.musicplayer.servizi.ModalitaRiproduzione;
+import it.unisa.musicplayer.servizi.Sequenziale;
 import it.unisa.musicplayer.servizi.Shuffle;
+import it.unisa.musicplayer.servizi.StatoLettore;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToggleGroup;
-import javafx.scene.layout.HBox;
 import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
-import javafx.scene.control.SelectionMode;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
 public class PrimaryController {
 
     // Navigazione e Struttura della GUI
@@ -584,51 +584,73 @@ public class PrimaryController {
         }
 
         // 9. INTERFACCIA DI RIMOZIONE BRANO DAL CATALOGO (US-05)
-        if (btnRemoveTrack != null) {
-            btnRemoveTrack.setOnAction(e -> {
-                Traccia tracciaSelezionata = songTableView.getSelectionModel().getSelectedItem();
 
-                if (tracciaSelezionata == null) {
-                    Alert alert = new Alert(
-                            Alert.AlertType.WARNING,
-                            "Seleziona prima una traccia dalla tabella."
-                    );
-                    alert.setTitle("Nessuna traccia selezionata");
-                    alert.setHeaderText(null);
-                    alert.showAndWait();
-                    return;
-                }
+        // 9. INTERFACCIA DI RIMOZIONE BRANO DAL CATALOGO (US-05)
+if (btnRemoveTrack != null) {
+    btnRemoveTrack.setOnAction(e -> {
+        Traccia tracciaSelezionata = songTableView.getSelectionModel().getSelectedItem();
 
-                Alert conferma = new Alert(Alert.AlertType.CONFIRMATION);
-                conferma.setTitle("Conferma eliminazione");
-                conferma.setHeaderText("Eliminare definitivamente la traccia?");
-                conferma.setContentText(
-                        "La traccia \"" + tracciaSelezionata.getTitolo() + "\" verrà rimossa dal catalogo " +
-                                "e da tutte le playlist in cui è presente."
-                );
-
-                java.util.Optional<ButtonType> scelta = conferma.showAndWait();
-
-                if (scelta.isPresent() && scelta.get() == ButtonType.OK) {
-                    try {
-                        Catalogo.getInstance().rimuoviTraccia(tracciaSelezionata);
-                        songTableView.getSelectionModel().clearSelection();
-
-                        if (currentTrackLabel != null &&
-                                currentTrackLabel.getText().equals(tracciaSelezionata.getTitolo())) {
-                            currentTrackLabel.setText("Seleziona un brano");
-                        }
-
-                    } catch (IllegalArgumentException ex) {
-                        Alert alert = new Alert(Alert.AlertType.ERROR, ex.getMessage());
-                        alert.setTitle("Errore eliminazione");
-                        alert.setHeaderText(null);
-                        alert.showAndWait();
-                    }
-                }
-            });
+        if (tracciaSelezionata == null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING, "Seleziona prima una traccia dalla tabella.");
+            alert.setTitle("Nessuna traccia selezionata");
+            alert.setHeaderText(null);
+            alert.showAndWait();
+            return;
         }
 
+        // Controlla se siamo in una playlist o nel catalogo
+        Playlist playlistSelezionata = sidebarListView.getSelectionModel().getSelectedItem();
+        boolean siamoInPlaylist = playlistSelezionata != null && 
+                                  catalogTitleLabel.getText().startsWith("Playlist:");
+
+        if (siamoInPlaylist) {
+            // Rimuovi solo dalla playlist
+            Alert conferma = new Alert(Alert.AlertType.CONFIRMATION);
+            conferma.setTitle("Conferma rimozione");
+            conferma.setHeaderText("Rimuovere dalla playlist?");
+            conferma.setContentText("La traccia \"" + tracciaSelezionata.getTitolo() + 
+                "\" verrà rimossa dalla playlist \"" + playlistSelezionata.getNome() + 
+                "\" ma rimarrà nel catalogo generale.");
+
+            java.util.Optional<ButtonType> scelta = conferma.showAndWait();
+            if (scelta.isPresent() && scelta.get() == ButtonType.OK) {
+                playlistSelezionata.rimuoviTraccia(tracciaSelezionata);
+                CatalogoPlaylist.getInstance().eseguiSalvataggioAutomatico();
+                songTableView.refresh();
+            } else {
+                songTableView.getSelectionModel().clearSelection();
+            }
+
+        } else {
+            // Rimuovi dal catalogo generale
+            Alert conferma = new Alert(Alert.AlertType.CONFIRMATION);
+            conferma.setTitle("Conferma eliminazione");
+            conferma.setHeaderText("Eliminare definitivamente la traccia?");
+            conferma.setContentText("La traccia \"" + tracciaSelezionata.getTitolo() + 
+                "\" verrà rimossa dal catalogo e da tutte le playlist in cui è presente.");
+
+            java.util.Optional<ButtonType> scelta = conferma.showAndWait();
+            if (scelta.isPresent() && scelta.get() == ButtonType.OK) {
+                try {
+                    Catalogo.getInstance().rimuoviTraccia(tracciaSelezionata);
+                    songTableView.getSelectionModel().clearSelection();
+
+                    if (currentTrackLabel != null &&
+                            currentTrackLabel.getText().equals(tracciaSelezionata.getTitolo())) {
+                        currentTrackLabel.setText("Seleziona un brano");
+                    }
+                } catch (IllegalArgumentException ex) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR, ex.getMessage());
+                    alert.setTitle("Errore eliminazione");
+                    alert.setHeaderText(null);
+                    alert.showAndWait();
+                }
+            } else {
+                songTableView.getSelectionModel().clearSelection();
+            }
+        }
+    });
+}
     }
 
     private void configuraControlliModalitaPlaylist() {
