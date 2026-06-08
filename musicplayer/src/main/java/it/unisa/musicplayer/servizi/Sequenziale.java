@@ -8,16 +8,36 @@ public class Sequenziale extends ModalitaRiproduzione {
 
     @Override
     public Traccia prossimaTraccia(List<Traccia> tracce, Traccia corrente) {
-        int indice = -1;
-        for (int i = 0; i < tracce.size(); i++) {
-            if (tracce.get(i).getId().equals(corrente.getId())) {
-                indice = i;
-                break;
-            }
+        if (tracce == null || tracce.isEmpty()) {
+            return null;
         }
-        if (indice == -1 || indice >= tracce.size() - 1) {
+
+        /*
+         * Se non esiste ancora una traccia corrente,
+         * la riproduzione parte dalla prima traccia.
+         */
+        if (corrente == null) {
             return tracce.get(0);
         }
-        return tracce.get(indice + 1);
+
+        int indiceCorrente = tracce.indexOf(corrente);
+
+        /*
+         * Se la traccia corrente non appartiene alla lista,
+         * non è possibile determinare la successiva.
+         */
+        if (indiceCorrente == -1) {
+            return null;
+        }
+
+        /*
+         * In modalità sequenziale, dopo l'ultima traccia
+         * la riproduzione termina.
+         */
+        if (indiceCorrente == tracce.size() - 1) {
+            return null;
+        }
+
+        return tracce.get(indiceCorrente + 1);
     }
 }

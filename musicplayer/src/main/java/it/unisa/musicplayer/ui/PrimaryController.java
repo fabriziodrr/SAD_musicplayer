@@ -15,10 +15,16 @@ import it.unisa.musicplayer.servizi.GeneratorePlaylistAutomatica;
 import it.unisa.musicplayer.servizi.Lettore;
 import it.unisa.musicplayer.servizi.Sequenziale;
 import it.unisa.musicplayer.servizi.StatoLettore;
+import it.unisa.musicplayer.servizi.Loop;
+import it.unisa.musicplayer.servizi.ModalitaRiproduzione;
+import it.unisa.musicplayer.servizi.Shuffle;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
+import javafx.scene.layout.HBox;
 import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
@@ -40,6 +46,7 @@ public class PrimaryController {
     @FXML private Button btnNavHome;
     @FXML private Button btnNavStats;
     @FXML private Button btnOpenMockDialog;
+    @FXML private Button mainPlaylistPlayButton;
     
     // Ora è perfettamente mappato sull'id dell'FXML modificato
     @FXML private Button btnEditTrack;
@@ -54,6 +61,12 @@ public class PrimaryController {
     @FXML private ListView<String> topPlaylistsListView;
     @FXML private Label currentTrackLabel;
     @FXML private Label catalogTitleLabel;
+    // Controlli modalità della playlist - US-10
+    @FXML private HBox playlistModeControls;
+    @FXML private ToggleButton btnPlaylistSequenziale;
+    @FXML private ToggleButton btnPlaylistLoop;
+    @FXML private ToggleButton btnPlaylistShuffle;
+
 
     // TableView mappata sulla classe reale "Traccia"
     @FXML private TableView<Traccia> songTableView;
@@ -77,7 +90,12 @@ public class PrimaryController {
 
     private it.unisa.musicplayer.servizi.Lettore lettore;
     private javafx.animation.Timeline timer;
-    
+    private Playlist playlistCorrenteUi;
+    private final ToggleGroup gruppoModalitaPlaylist = new ToggleGroup();
+
+    private ModalitaRiproduzione modalitaPlaylistSelezionata =
+            new Sequenziale();
+
     @FXML
     public void initialize() {
         
@@ -157,6 +175,9 @@ public class PrimaryController {
         lettore = new Lettore();
         lettore.setModalita(new Sequenziale());
 
+        configuraControlliModalitaPlaylist();
+        mostraControlliModalitaPlaylist(false);
+
 // Binding label nome traccia
 if (currentTrackLabel != null) {
     currentTrackLabel.textProperty().bind(
@@ -234,29 +255,58 @@ if (btnPlay != null) {
             btnPlay.setText("▶");
             timer.pause();
         } else {
-            if (lettore.getTracciaCorrente() == null) return;
-            lettore.play();
-            btnPlay.setText("||");
-            timer.play();
+            if (lettore.getTracciaCorrente() == null) {
+                Traccia tracciaDaAvviare = songTableView.getSelectionModel().getSelectedItem();
+                if (tracciaDaAvviare == null && !songTableView.getItems().isEmpty()) {
+                    tracciaDaAvviare = songTableView.getItems().get(0);
+                }
+                if (tracciaDaAvviare == null) return;
+                avviaRiproduzioneDaTraccia(tracciaDaAvviare);
+            } else {
+                lettore.play();
+                btnPlay.setText("||");
+                timer.play();
+            }
+        }
+    });
+}
+
+if (mainPlaylistPlayButton != null) {
+    mainPlaylistPlayButton.setOnAction(e -> {
+        Traccia tracciaDaAvviare = songTableView.getSelectionModel().getSelectedItem();
+        if (tracciaDaAvviare == null && !songTableView.getItems().isEmpty()) {
+            tracciaDaAvviare = songTableView.getItems().get(0);
+        }
+        if (tracciaDaAvviare != null) {
+            avviaRiproduzioneDaTraccia(tracciaDaAvviare);
         }
     });
 }
 
 // Bottone Skip
-if (btnSkip != null) {
-    btnSkip.setOnAction(e -> {
-        if (lettore.getTracciaCorrente() == null) return;
-        lettore.skip();
-        if (lettore.getTracciaCorrente() == null) {
-            // Riparte dall'inizio
-            List<Traccia> coda = new ArrayList<>(Catalogo.getInstance().getTracce());
-            lettore.aggiornaCodeTracce(coda);
-            lettore.play();
+        if (btnSkip != null) {
+            btnSkip.setOnAction(e -> {
+                if (lettore.getTracciaCorrente() == null) {
+                    return;
+                }
+
+                lettore.skip();
+
+                if (lettore.getTracciaCorrente() == null) {
+                    timer.pause();
+
+                    if (btnPlay != null) {
+                        btnPlay.setText("▶");
+                    }
+                } else {
+                    timer.play();
+
+                    if (btnPlay != null) {
+                        btnPlay.setText("||");
+                    }
+                }
+            });
         }
-        timer.play();
-        btnPlay.setText("||");
-    });
-}
 
 // Bottone Precedente
 if (btnPrecedente != null) {
@@ -320,13 +370,7 @@ songTableView.setRowFactory(tv -> {
         if (event.getClickCount() == 2 && !row.isEmpty()) {
             Traccia cliccata = row.getItem();
             if (cliccata != null) {
-                List<Traccia> tutteLeTracce = new ArrayList<>(Catalogo.getInstance().getTracce());
-                lettore.aggiornaCodeTracce(tutteLeTracce);
-                lettore.tracciaCorrenteProperty().set(cliccata);
-                lettore.play();
-                timer.play();
-                btnPlay.setText("||");
-                cliccata.incrementaRiproduzioni();
+                avviaRiproduzioneDaTraccia(cliccata);
             }
         }
     });
@@ -341,6 +385,9 @@ songTableView.setRowFactory(tv -> {
                 btnNavStats.setStyle("-fx-background-color: transparent; -fx-text-fill: #B3B3B3;");
                 if (catalogTitleLabel != null) catalogTitleLabel.setText("Catalogo Globale");
                 if (songTableView != null) songTableView.setItems(Catalogo.getInstance().getTracce());
+                playlistCorrenteUi = null;
+                mostraControlliModalitaPlaylist(false);
+                if (sidebarListView != null) sidebarListView.getSelectionModel().clearSelection();
             });
         }
 
@@ -363,6 +410,10 @@ songTableView.setRowFactory(tv -> {
                     btnNavStats.setStyle("-fx-background-color: transparent; -fx-text-fill: #B3B3B3;");
                     if (catalogTitleLabel != null) catalogTitleLabel.setText("Playlist: " + newVal.getNome());
                     if (songTableView != null) songTableView.setItems(newVal.getTracce());
+                    playlistCorrenteUi = newVal;
+                    mostraControlliModalitaPlaylist(true);
+                    lettore.sincronizzaConPlaylist(newVal);
+                    lettore.setModalita(modalitaPlaylistSelezionata);
                 }
             });
         }
@@ -545,6 +596,86 @@ songTableView.setRowFactory(tv -> {
 
     }
 
+    private void configuraControlliModalitaPlaylist() {
+        if (btnPlaylistSequenziale == null
+                || btnPlaylistLoop == null
+                || btnPlaylistShuffle == null) {
+            return;
+        }
+
+        btnPlaylistSequenziale.setToggleGroup(
+                gruppoModalitaPlaylist
+        );
+
+        btnPlaylistLoop.setToggleGroup(
+                gruppoModalitaPlaylist
+        );
+
+        btnPlaylistShuffle.setToggleGroup(
+                gruppoModalitaPlaylist
+        );
+
+        gruppoModalitaPlaylist
+                .selectedToggleProperty()
+                .addListener((observable, precedente, nuova) -> {
+
+                    /*
+                     * Non permettiamo di lasciare tutte
+                     * le modalità deselezionate.
+                     */
+                    if (nuova == null) {
+                        if (precedente != null) {
+                            precedente.setSelected(true);
+                        }
+                        return;
+                    }
+
+                    onCambiaModalita();
+                });
+
+        // Modalità iniziale
+        btnPlaylistSequenziale.setSelected(true);
+        onCambiaModalita();
+    }
+
+    private void onCambiaModalita() {
+        if (btnPlaylistLoop != null
+                && btnPlaylistLoop.isSelected()) {
+
+            modalitaPlaylistSelezionata = new Loop();
+
+        } else if (btnPlaylistShuffle != null
+                && btnPlaylistShuffle.isSelected()) {
+
+            modalitaPlaylistSelezionata = new Shuffle();
+
+        } else {
+            modalitaPlaylistSelezionata = new Sequenziale();
+
+            if (btnPlaylistSequenziale != null
+                    && !btnPlaylistSequenziale.isSelected()) {
+                btnPlaylistSequenziale.setSelected(true);
+            }
+        }
+
+        /*
+         * La modalità viene applicata soltanto
+         * quando è aperta una playlist.
+         */
+        if (lettore != null && playlistCorrenteUi != null) {
+            lettore.setModalita(modalitaPlaylistSelezionata);
+        }
+    }
+
+    private void mostraControlliModalitaPlaylist(boolean visibili) {
+        if (playlistModeControls == null) {
+            return;
+        }
+
+        playlistModeControls.setVisible(visibili);
+        playlistModeControls.setManaged(visibili);
+    }
+
     private void onAggiungiTracciaPlaylist() {
         java.util.List<Traccia> tracceSelezionate =
                 new java.util.ArrayList<>(songTableView.getSelectionModel().getSelectedItems());
@@ -702,6 +833,37 @@ songTableView.setRowFactory(tv -> {
                 CatalogoPlaylist.getInstance().aggiungiPlaylist(playlist);
             }
         }
+    }
+
+    private void avviaRiproduzioneDaTraccia(Traccia traccia) {
+        if (traccia == null || songTableView == null || songTableView.getItems().isEmpty()) {
+            return;
+        }
+
+        if (playlistCorrenteUi != null) {
+            lettore.sincronizzaConPlaylist(playlistCorrenteUi);
+            lettore.setModalita(modalitaPlaylistSelezionata);
+        } else {
+            lettore.aggiornaCodeTracce(
+                    new ArrayList<>(songTableView.getItems())
+            );
+
+            /*
+             * Le modalità di US-10 riguardano la playlist.
+             * Nel catalogo manteniamo Sequenziale.
+             */
+            lettore.setModalita(new Sequenziale());
+        }
+
+        lettore.tracciaCorrenteProperty().set(traccia);
+        lettore.play();
+        timer.play();
+
+        if (btnPlay != null) {
+            btnPlay.setText("||");
+        }
+
+        traccia.incrementaRiproduzioni();
     }
 
 }

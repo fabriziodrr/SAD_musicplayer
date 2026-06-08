@@ -2,19 +2,23 @@ package it.unisa.musicplayer.servizi;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
+import it.unisa.musicplayer.modello.Playlist;
 import it.unisa.musicplayer.modello.Traccia;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.ListChangeListener;
 
 public class Lettore {
 
     private StatoLettore stato;
     private List<Traccia> coda;
     private ModalitaRiproduzione modalita;
-    private int tempoTrascorsoInt;
+    private Playlist playlistCorrente;
+    private ListChangeListener<Traccia> listenerPlaylistCorrente;
 
     // JavaFX Properties per binding con UI
     private final ObjectProperty<Traccia> tracciaCorrente = new SimpleObjectProperty<>();
@@ -23,6 +27,7 @@ public class Lettore {
     public Lettore() {
         this.stato = StatoLettore.STOPPED;
         this.coda = new ArrayList<>();
+        this.modalita = new Sequenziale();
     }
 
     public void play() {
@@ -69,8 +74,58 @@ public class Lettore {
         tracciaCorrente.set(coda.isEmpty() ? null : coda.get(0));
     }
 
+    public void sincronizzaConPlaylist(Playlist playlist) {
+        if (playlist == null) {
+            throw new IllegalArgumentException("La playlist da sincronizzare non può essere null");
+        }
+
+        if (playlistCorrente != null && listenerPlaylistCorrente != null) {
+            playlistCorrente.getTracce().removeListener(listenerPlaylistCorrente);
+        }
+
+        playlistCorrente = playlist;
+        coda = new ArrayList<>(playlist.getTracce());
+        if (tracciaCorrente.get() == null && !coda.isEmpty()) {
+            tracciaCorrente.set(coda.get(0));
+        }
+
+        listenerPlaylistCorrente = change -> {
+            while (change.next()) {
+                if (change.wasAdded()) {
+                    coda.addAll(change.getAddedSubList());
+                }
+                if (change.wasRemoved()) {
+                    List<? extends Traccia> rimosse = change.getRemoved();
+                    boolean correnteRimossa = false;
+                    for (Traccia rimossa : rimosse) {
+                        if (rimossa.equals(tracciaCorrente.get())) {
+                            correnteRimossa = true;
+                        }
+                    }
+                    coda.removeAll(rimosse);
+                    if (correnteRimossa) {
+                        tempoTrascorso.set(0);
+                        if (coda.isEmpty()) {
+                            tracciaCorrente.set(null);
+                            stato = StatoLettore.STOPPED;
+                        } else if (modalita != null) {
+                            Traccia prossima = modalita.prossimaTraccia(coda, tracciaCorrente.get());
+                            tracciaCorrente.set(prossima);
+                            stato = StatoLettore.PLAYING;
+                        }
+                    }
+                }
+            }
+        };
+
+        playlistCorrente.getTracce().addListener(listenerPlaylistCorrente);
+    }
+
     public void setModalita(ModalitaRiproduzione modalita) {
-        this.modalita = modalita;
+        this.modalita = Objects.requireNonNull(
+                modalita,
+                "La modalità di riproduzione non può essere null"
+        );
     }
 
     public StatoLettore getStato() { return stato; }
