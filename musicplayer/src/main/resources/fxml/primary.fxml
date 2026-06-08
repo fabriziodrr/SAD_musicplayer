@@ -86,12 +86,12 @@
                            </children>
                         </HBox>
 
-                        <!-- Modalità di riproduzione della playlist - US-10 -->
+                        <!-- Modalità di riproduzione del catalogo o della playlist visualizzata -->
                         <HBox fx:id="playlistModeControls"
                               alignment="CENTER_LEFT"
-                              managed="false"
+                              managed="true"
                               spacing="8.0"
-                              visible="false">
+                              visible="true">
 
                            <children>
                               <ToggleButton fx:id="btnPlaylistSequenziale"
