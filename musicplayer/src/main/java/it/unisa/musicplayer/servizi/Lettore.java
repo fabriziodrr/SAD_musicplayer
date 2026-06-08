@@ -2,6 +2,7 @@ package it.unisa.musicplayer.servizi;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import it.unisa.musicplayer.modello.Playlist;
 import it.unisa.musicplayer.modello.Traccia;
@@ -26,6 +27,7 @@ public class Lettore {
     public Lettore() {
         this.stato = StatoLettore.STOPPED;
         this.coda = new ArrayList<>();
+        this.modalita = new Sequenziale();
     }
 
     public void play() {
@@ -120,7 +122,10 @@ public class Lettore {
     }
 
     public void setModalita(ModalitaRiproduzione modalita) {
-        this.modalita = modalita;
+        this.modalita = Objects.requireNonNull(
+                modalita,
+                "La modalità di riproduzione non può essere null"
+        );
     }
 
     public StatoLettore getStato() { return stato; }

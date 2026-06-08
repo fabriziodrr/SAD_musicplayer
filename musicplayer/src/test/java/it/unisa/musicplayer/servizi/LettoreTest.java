@@ -7,6 +7,11 @@ import org.junit.jupiter.api.AfterEach;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import it.unisa.musicplayer.modello.Traccia;
 
@@ -102,13 +107,16 @@ class LettoreTest {
     }
 
     @Test
-    void testSkipUltimaTracciaRiparteDallInizio() {
+    void testSkipUltimaTracciaInSequenzialeTerminaRiproduzione() {
         List<Traccia> coda = new ArrayList<>();
         coda.add(traccia1);
+
         lettore.aggiornaCodeTracce(coda);
         lettore.play();
         lettore.skip();
-        assertEquals(traccia1, lettore.getTracciaCorrente());
+
+        assertNull(lettore.getTracciaCorrente());
+        assertEquals(StatoLettore.STOPPED, lettore.getStato());
     }
 
     @Test
@@ -204,4 +212,79 @@ class LettoreTest {
         lettore.stop();
         assertEquals(0, lettore.getTempoTrascorso());
     }
+
+    @Test
+    void testLettoreConLoopRiparteDallaPrimaTraccia() {
+        List<Traccia> coda = List.of(traccia1, traccia2, traccia3);
+
+        lettore.aggiornaCodeTracce(coda);
+        lettore.setModalita(new Loop());
+        lettore.play();
+
+        lettore.skip();
+        assertEquals(traccia2, lettore.getTracciaCorrente());
+
+        lettore.skip();
+        assertEquals(traccia3, lettore.getTracciaCorrente());
+
+        lettore.skip();
+        assertEquals(traccia1, lettore.getTracciaCorrente());
+        assertEquals(StatoLettore.PLAYING, lettore.getStato());
+    }
+
+    @Test
+    void testLettoreConShuffleNonRipeteConsecutivamenteLaTraccia() {
+        List<Traccia> coda = List.of(traccia1, traccia2, traccia3);
+
+        lettore.aggiornaCodeTracce(coda);
+        lettore.setModalita(new Shuffle());
+        lettore.play();
+
+        Traccia precedente = lettore.getTracciaCorrente();
+
+        for (int i = 0; i < 20; i++) {
+            lettore.skip();
+
+            Traccia corrente = lettore.getTracciaCorrente();
+
+            assertNotNull(corrente);
+            assertTrue(coda.contains(corrente));
+            assertNotEquals(precedente, corrente);
+
+            precedente = corrente;
+        }
+    }
+
+
+    @Test
+    void testCambioModalitaDuranteLaRiproduzione() {
+        List<Traccia> coda = List.of(traccia1, traccia2);
+
+        lettore.aggiornaCodeTracce(coda);
+        lettore.setModalita(new Sequenziale());
+        lettore.play();
+
+        lettore.skip();
+        assertEquals(traccia2, lettore.getTracciaCorrente());
+
+        lettore.setModalita(new Loop());
+        lettore.skip();
+
+        assertEquals(traccia1, lettore.getTracciaCorrente());
+        assertEquals(StatoLettore.PLAYING, lettore.getStato());
+    }
+
+
+    @Test
+    void testSetModalitaNullLanciaEccezione() {
+        assertThrows(
+                NullPointerException.class,
+                () -> lettore.setModalita(null)
+        );
+    }
+
+
+
+
+
 }
