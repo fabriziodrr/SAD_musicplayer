@@ -129,6 +129,7 @@ public class PrimaryController {
     private it.unisa.musicplayer.servizi.Lettore lettore;
     private javafx.animation.Timeline timer;
     private Playlist playlistCorrenteUi;
+    private Playlist playlistInRiproduzione;
     private final ToggleGroup gruppoModalitaPlaylist = new ToggleGroup();
 
     private ModalitaRiproduzione modalitaPlaylistSelezionata =
@@ -355,7 +356,7 @@ public class PrimaryController {
                 lettore.skip();
         
                 if (lettore.getTracciaCorrente() == null) {
-                    List<Traccia> coda = new ArrayList<>(Catalogo.getInstance().getTracce());
+                    List<Traccia> coda = creaCodaRiproduzioneCorrente();
                     lettore.aggiornaCodeTracce(coda);
                     lettore.setModalita(new SequenzialeSingola());
                     lettore.play();
@@ -372,7 +373,7 @@ public class PrimaryController {
         if (btnPrecedente != null) {
             btnPrecedente.setOnAction(e -> {
                 if (lettore.getTracciaCorrente() == null) return;
-                List<Traccia> tracce = new ArrayList<>(Catalogo.getInstance().getTracce());
+                List<Traccia> tracce = creaCodaRiproduzioneCorrente();
                 int indice = tracce.indexOf(lettore.getTracciaCorrente());
                 if (indice > 0) {
                     List<Traccia> nuovaCoda = tracce.subList(indice - 1, tracce.size());
@@ -467,9 +468,7 @@ if (trackLoopButton != null) {
                                     btnPlay.setText("▶");
                                 } else {
                                     // Altrimenti riparte dall'inizio
-                                    List<Traccia> coda = playlistCorrenteUi != null 
-                                        ? new ArrayList<>(playlistCorrenteUi.getTracce())
-                                        : new ArrayList<>(Catalogo.getInstance().getTracce());
+                                    List<Traccia> coda = creaCodaRiproduzioneCorrente();
                                     lettore.aggiornaCodeTracce(coda);
                                     lettore.play();
                                     timer.play();
@@ -493,9 +492,7 @@ Catalogo.getInstance().getTracce().addListener(
         if (lettore.getStato() == StatoLettore.PLAYING || 
             lettore.getStato() == StatoLettore.PAUSED) {
             Traccia corrente = lettore.getTracciaCorrente();
-            java.util.List<Traccia> sorgenteCoda = playlistCorrenteUi != null
-                    ? new ArrayList<>(playlistCorrenteUi.getTracce())
-                    : new ArrayList<>(Catalogo.getInstance().getTracce());
+            java.util.List<Traccia> sorgenteCoda = creaCodaRiproduzioneCorrente();
             // Aggiorna la coda senza resettare la traccia corrente
             lettore.getCoda().clear();
             lettore.getCoda().addAll(sorgenteCoda);
@@ -670,6 +667,9 @@ Catalogo.getInstance().getTracce().addListener(
                             if (playlistCorrenteUi != null && 
                                 catalogTitleLabel.getText().startsWith("Playlist:")) {
                                 playlistCorrenteUi.aggiungiTraccia(nuovaTraccia);
+                                if (playlistCorrenteUi.equals(playlistInRiproduzione)) {
+                                    lettore.aggiungiTracciaInCoda(nuovaTraccia);
+                                }
                                 CatalogoPlaylist.getInstance().eseguiSalvataggioAutomatico();
                             }
                         }
@@ -793,7 +793,9 @@ if (btnRemoveTrack != null) {
 
             java.util.Optional<ButtonType> scelta = conferma.showAndWait();
             if (scelta.isPresent() && scelta.get() == ButtonType.OK) {
-                lettore.rimuoviTracciaDallaCoda(tracciaSelezionata);
+                if (playlistSelezionata.equals(playlistInRiproduzione)) {
+                    lettore.rimuoviTracciaDallaCoda(tracciaSelezionata);
+                }
                 playlistSelezionata.rimuoviTraccia(tracciaSelezionata);
                 CatalogoPlaylist.getInstance().eseguiSalvataggioAutomatico();
                 songTableView.refresh();
@@ -969,6 +971,9 @@ if (trackLoopButton != null) {
 
         for (Traccia traccia : tracceSelezionate) {
             playlistScelta.aggiungiTraccia(traccia);
+            if (playlistScelta.equals(playlistInRiproduzione)) {
+                lettore.aggiungiTracciaInCoda(traccia);
+            }
         }
 
         CatalogoPlaylist.getInstance().eseguiSalvataggioAutomatico();
@@ -1092,8 +1097,10 @@ if (trackLoopButton != null) {
 
         if (playlistCorrenteUi != null) {
             lettore.aggiornaCodeTracce(new ArrayList<>(playlistCorrenteUi.getTracce()));
+            playlistInRiproduzione = playlistCorrenteUi;
         } else {
             lettore.aggiornaCodeTracce(new ArrayList<>(Catalogo.getInstance().getTracce()));
+            playlistInRiproduzione = null;
         }
         lettore.setModalita(modalitaPlaylistSelezionata);
 
@@ -1106,5 +1113,12 @@ if (trackLoopButton != null) {
         }
 
         traccia.incrementaRiproduzioni();
+    }
+
+    private List<Traccia> creaCodaRiproduzioneCorrente() {
+        if (playlistInRiproduzione != null) {
+            return new ArrayList<>(playlistInRiproduzione.getTracce());
+        }
+        return new ArrayList<>(Catalogo.getInstance().getTracce());
     }
 }

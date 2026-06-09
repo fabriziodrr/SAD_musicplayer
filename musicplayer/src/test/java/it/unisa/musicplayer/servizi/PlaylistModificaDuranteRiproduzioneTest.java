@@ -82,9 +82,18 @@ class PlaylistModificaDuranteRiproduzioneTest {
     void task1202AggiuntaTracciaAllaPlaylistCorrenteVieneAccodataNelLettore() {
         lettore.play();
         playlist.aggiungiTraccia(traccia3);
-        lettore.getCoda().add(traccia3);
+        lettore.aggiungiTracciaInCoda(traccia3);
         assertEquals(List.of(traccia1, traccia2, traccia3), lettore.getCoda());
         assertEquals(StatoLettore.PLAYING, lettore.getStato());
+        assertEquals(traccia1, lettore.getTracciaCorrente());
+    }
+
+    @Test
+    void task1202AggiuntaTracciaDuplicataNonDuplicaCodaLettore() {
+        lettore.play();
+        playlist.aggiungiTraccia(traccia2);
+        lettore.aggiungiTracciaInCoda(traccia2);
+        assertEquals(List.of(traccia1, traccia2), lettore.getCoda());
         assertEquals(traccia1, lettore.getTracciaCorrente());
     }
 
@@ -98,6 +107,18 @@ class PlaylistModificaDuranteRiproduzioneTest {
         assertEquals(List.of(traccia1, traccia3), lettore.getCoda());
         assertEquals(StatoLettore.PLAYING, lettore.getStato());
         assertEquals(traccia1, lettore.getTracciaCorrente());
+    }
+
+    @Test
+    void task1203RimozioneTracciaNonCorrenteNonVieneRiprodottaDopoSkip() {
+        playlist.aggiungiTraccia(traccia3);
+        lettore.aggiornaCodeTracce(new ArrayList<>(playlist.getTracce()));
+        lettore.play();
+        playlist.rimuoviTraccia(traccia2);
+        lettore.rimuoviTracciaDallaCoda(traccia2);
+        lettore.skip();
+        assertEquals(traccia3, lettore.getTracciaCorrente());
+        assertEquals(StatoLettore.PLAYING, lettore.getStato());
     }
 
     @Test

@@ -74,6 +74,14 @@ public class Lettore {
         tracciaCorrente.set(coda.isEmpty() ? null : coda.get(0));
     }
 
+    public void aggiungiTracciaInCoda(Traccia traccia) {
+        Objects.requireNonNull(traccia, "La traccia da aggiungere non può essere null");
+
+        if (!coda.contains(traccia)) {
+            coda.add(traccia);
+        }
+    }
+
     public void rimuoviTracciaDallaCoda(Traccia traccia) {
         Objects.requireNonNull(traccia, "La traccia da rimuovere non può essere null");
 
