@@ -195,7 +195,7 @@
 }
 
 .song-table .table-row-cell:selected {
-    -fx-background-color: #2a2a2a;
+    -fx-background-color: #3a3a3a;
 }
 
 .song-table .table-cell {

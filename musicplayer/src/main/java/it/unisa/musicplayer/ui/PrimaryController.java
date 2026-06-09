@@ -14,9 +14,12 @@ import it.unisa.musicplayer.modello.Traccia;
 import it.unisa.musicplayer.servizi.GeneratorePlaylistAutomatica;
 import it.unisa.musicplayer.servizi.Lettore;
 import it.unisa.musicplayer.servizi.Loop;
+import it.unisa.musicplayer.servizi.LoopSingola;
 import it.unisa.musicplayer.servizi.ModalitaRiproduzione;
 import it.unisa.musicplayer.servizi.Sequenziale;
+import it.unisa.musicplayer.servizi.SequenzialeSingola;
 import it.unisa.musicplayer.servizi.Shuffle;
+import it.unisa.musicplayer.servizi.ShuffleSingola;
 import it.unisa.musicplayer.servizi.StatoLettore;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -63,6 +66,8 @@ public class PrimaryController {
     @FXML
     private Button createNewPlaylistButton;
     @FXML private Button btnGeneraPlaylistAuto;
+    @FXML private Button trackShuffleButton;
+    @FXML private Button trackLoopButton;
 
     // Elementi di testo, etichette e liste
     @FXML
@@ -208,7 +213,7 @@ public class PrimaryController {
 
         // 3.  LETTORE US-09
         lettore = new Lettore();
-        lettore.setModalita(new Sequenziale());
+        lettore.setModalita(new SequenzialeSingola());
 
         configuraControlliModalitaPlaylist();
         mostraControlliModalitaPlaylist(true);
@@ -319,7 +324,7 @@ public class PrimaryController {
         }
 
 // Bottone Skip
-        if (btnSkip != null) {
+      /*  if (btnSkip != null) {
             btnSkip.setOnAction(e -> {
                 if (lettore.getTracciaCorrente() == null) {
                     return;
@@ -341,6 +346,26 @@ public class PrimaryController {
                     }
                 }
             });
+        }*/
+
+        if (btnSkip != null) {
+            btnSkip.setOnAction(e -> {
+                if (lettore.getTracciaCorrente() == null) return;
+        
+                lettore.skip();
+        
+                if (lettore.getTracciaCorrente() == null) {
+                    List<Traccia> coda = new ArrayList<>(Catalogo.getInstance().getTracce());
+                    lettore.aggiornaCodeTracce(coda);
+                    lettore.setModalita(new SequenzialeSingola());
+                    lettore.play();
+                    timer.play();
+                    if (btnPlay != null) btnPlay.setText("||");
+                } else {
+                    timer.play();
+                    if (btnPlay != null) btnPlay.setText("||");
+                }
+            });
         }
 
 // Bottone Precedente
@@ -352,6 +377,7 @@ public class PrimaryController {
                 if (indice > 0) {
                     List<Traccia> nuovaCoda = tracce.subList(indice - 1, tracce.size());
                     lettore.aggiornaCodeTracce(new ArrayList<>(nuovaCoda));
+                    lettore.setModalita(new SequenzialeSingola());
                     lettore.play();
                 }
                 timer.play();
@@ -359,8 +385,36 @@ public class PrimaryController {
             });
         }
 
+// Bottone Shuffle
+if (trackShuffleButton != null) {
+    trackShuffleButton.setOnAction(e -> {
+        if ("SHUFFLE_SINGOLA".equals(lettore.getModalita().getNome())) {
+            lettore.setModalita(new Sequenziale());
+            trackShuffleButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #B3B3B3; -fx-font-size: 15px; -fx-cursor: hand;");
+        } else {
+            lettore.setModalita(new ShuffleSingola());
+            trackShuffleButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #1DB954; -fx-font-size: 15px; -fx-cursor: hand;");
+            trackLoopButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #B3B3B3; -fx-font-size: 15px; -fx-cursor: hand;");
+        }
+    });
+}
+
+// Bottone Loop
+if (trackLoopButton != null) {
+    trackLoopButton.setOnAction(e -> {
+        if ("LOOP_SINGOLA".equals(lettore.getModalita().getNome())) {
+            lettore.setModalita(new Sequenziale());
+            trackLoopButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #B3B3B3; -fx-font-size: 15px; -fx-cursor: hand;");
+        } else {
+            lettore.setModalita(new LoopSingola());
+            trackLoopButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #1DB954; -fx-font-size: 15px; -fx-cursor: hand;");
+            trackShuffleButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #B3B3B3; -fx-font-size: 15px; -fx-cursor: hand;");
+        }
+    });
+}
+
 // Timer
-        timer = new javafx.animation.Timeline(
+       /* timer = new javafx.animation.Timeline(
                 new javafx.animation.KeyFrame(
                         javafx.util.Duration.seconds(1),
                         e -> {
@@ -371,23 +425,90 @@ public class PrimaryController {
                                 if (lettore.getTempoTrascorso() >= durataTotale) {
                                     lettore.skip();
                                     if (lettore.getTracciaCorrente() == null) {
-                                        timer.pause();
-                                        btnPlay.setText("▶");
-                                    }
+                                          // Se modalità sequenziale → si ferma
+                                     if ("SEQUENZIALE".equals(lettore.getModalita().getNome())) {
+                                     timer.pause();
+                                     btnPlay.setText("▶");
+                                     lettore.avanzaTempo(1); 
+                                    } else {
+                                        // Usa la playlist corrente se disponibile, altrimenti il catalogo
+                                        List<Traccia> coda = playlistCorrenteUi != null 
+                                            ? new ArrayList<>(playlistCorrenteUi.getTracce())
+                                            : new ArrayList<>(Catalogo.getInstance().getTracce());
+                                        lettore.aggiornaCodeTracce(coda);
+                                        lettore.play();
+                                        timer.play();
+                                        btnPlay.setText("||");
+                                    }                                   
                                 } else {
-                                    lettore.avanzaTempo(1);
+                                    lettore.avanzaTempo(1); 
                                 }
+                            }
                             }
                         }
                 )
         );
+        timer.setCycleCount(javafx.animation.Animation.INDEFINITE);*/
+
+        timer = new javafx.animation.Timeline(
+            new javafx.animation.KeyFrame(
+                javafx.util.Duration.seconds(1),
+                e -> {
+                    Traccia t = lettore.getTracciaCorrente();
+                    if (t != null) {
+                        String[] parti = t.getDurata().split(":");
+                        int durataTotale = Integer.parseInt(parti[0]) * 60 + Integer.parseInt(parti[1]);
+                        if (lettore.getTempoTrascorso() >= durataTotale) {
+                            lettore.skip();
+                            if (lettore.getTracciaCorrente() == null) {
+                                // Se modalità sequenziale → si ferma
+                                if ("SEQUENZIALE".equals(lettore.getModalita().getNome())) {
+                                    timer.pause();
+                                    btnPlay.setText("▶");
+                                } else {
+                                    // Altrimenti riparte dall'inizio
+                                    List<Traccia> coda = playlistCorrenteUi != null 
+                                        ? new ArrayList<>(playlistCorrenteUi.getTracce())
+                                        : new ArrayList<>(Catalogo.getInstance().getTracce());
+                                    lettore.aggiornaCodeTracce(coda);
+                                    lettore.play();
+                                    timer.play();
+                                    btnPlay.setText("||");
+                                }
+                            } else {
+                                btnPlay.setText("||");
+                            }
+                        } else {
+                            lettore.avanzaTempo(1);
+                        }
+                    }
+                }
+            )
+        );
         timer.setCycleCount(javafx.animation.Animation.INDEFINITE);
+
+        // Aggiorna la coda automaticamente quando il catalogo cambia
+Catalogo.getInstance().getTracce().addListener(
+    (javafx.collections.ListChangeListener<Traccia>) change -> {
+        if (lettore.getStato() == StatoLettore.PLAYING || 
+            lettore.getStato() == StatoLettore.PAUSED) {
+            Traccia corrente = lettore.getTracciaCorrente();
+            // Aggiorna la coda senza resettare la traccia corrente
+            lettore.getCoda().clear();
+            lettore.getCoda().addAll(new ArrayList<>(Catalogo.getInstance().getTracce()));
+            // Mantieni la traccia corrente
+            lettore.tracciaCorrenteProperty().set(corrente);
+        }
+    }
+);
 
 // Evidenzia la traccia corrente nella tabella
         lettore.tracciaCorrenteProperty().addListener((obs, old, nuova) -> {
             if (nuova != null && songTableView != null) {
-                songTableView.getSelectionModel().select(nuova);
                 songTableView.scrollTo(nuova);
+                songTableView.getSelectionModel().clearSelection();
+            } else {
+                if (songTableView != null) songTableView.getSelectionModel().clearSelection();
             }
         });
 
@@ -398,18 +519,46 @@ public class PrimaryController {
                 copertina.setVisible(nuova != null);
             });
         }
-// Doppio click sulla tabella
-        songTableView.setRowFactory(tv -> {
-            TableRow<Traccia> row = new TableRow<>();
-            row.setOnMouseClicked(event -> {
-                if (event.getClickCount() == 2 && !row.isEmpty()) {
-                    Traccia cliccata = row.getItem();
-                    if (cliccata != null) {
-                        avviaRiproduzioneDaTraccia(cliccata);
+
+        songTableView.setRowFactory(tv -> new TableRow<Traccia>() {
+            {
+                lettore.tracciaCorrenteProperty().addListener((obs, old, nuova) -> 
+                    javafx.application.Platform.runLater(() -> updateStyle()));
+                lettore.statoProperty().addListener((obs, old, nuova) -> 
+                    javafx.application.Platform.runLater(() -> updateStyle()));
+                
+                setOnMouseClicked(event -> {
+                    if (event.getClickCount() == 2 && !isEmpty()) {
+                        Traccia cliccata = getItem();
+                        if (cliccata != null) {
+                            avviaRiproduzioneDaTraccia(cliccata);
+                            javafx.application.Platform.runLater(() -> {
+                                songTableView.getSelectionModel().clearSelection();
+                                updateStyle();
+                            });
+                        }
                     }
+                });
+            }
+            
+            private void updateStyle() {
+                Traccia traccia = getItem();
+                Traccia corrente = lettore.getTracciaCorrente();
+                if (traccia != null && corrente != null && 
+                    traccia.getId().equals(corrente.getId()) &&
+                    (lettore.getStato() == StatoLettore.PLAYING || 
+                     lettore.getStato() == StatoLettore.PAUSED)) {
+                    setStyle("-fx-background-color: #1DB954; -fx-opacity: 0.3;");
+                } else {
+                    setStyle("");
                 }
-            });
-            return row;
+            }
+            
+            @Override
+            protected void updateItem(Traccia item, boolean empty) {
+                super.updateItem(item, empty);
+                updateStyle();
+            }
         });
 
         // 4. LOGICA DI SPOSTAMENTO SCHERMATE (ROUTING)
@@ -446,9 +595,8 @@ public class PrimaryController {
                     if (catalogTitleLabel != null) catalogTitleLabel.setText("Playlist: " + newVal.getNome());
                     if (songTableView != null) songTableView.setItems(newVal.getTracce());
                     playlistCorrenteUi = newVal;
-                    mostraControlliModalitaPlaylist(true);
-                    lettore.sincronizzaConPlaylist(newVal);
                     lettore.setModalita(modalitaPlaylistSelezionata);
+                    // Non si ferma la riproduzione, la coda si aggiorna solo quando si preme Play
                 }
             });
         }
@@ -510,10 +658,25 @@ public class PrimaryController {
                     dialog.getDialogPane().getButtonTypes().setAll(ButtonType.OK, ButtonType.CANCEL);
 
                     java.util.Optional<ButtonType> result = dialog.showAndWait();
+
                     if (result.isPresent() && result.get() == ButtonType.OK) {
                         Traccia nuovaTraccia = dialogController.getSongFromForm();
                         if (nuovaTraccia != null) {
                             Catalogo.getInstance().aggiungiTraccia(nuovaTraccia);
+                            // Se siamo in una playlist, aggiungi anche lì
+                            if (playlistCorrenteUi != null && 
+                                catalogTitleLabel.getText().startsWith("Playlist:")) {
+                                playlistCorrenteUi.aggiungiTraccia(nuovaTraccia);
+                                CatalogoPlaylist.getInstance().eseguiSalvataggioAutomatico();
+                            }
+                        }
+                        songTableView.getSelectionModel().clearSelection();
+                    }
+                   /* if (result.isPresent() && result.get() == ButtonType.OK) {
+                        Traccia nuovaTraccia = dialogController.getSongFromForm();
+                        if (nuovaTraccia != null) {
+                            Catalogo.getInstance().aggiungiTraccia(nuovaTraccia);
+
 
                             // Gestione playlist corrente visiva
                             if (catalogTitleLabel != null && catalogTitleLabel.getText().startsWith("Contenuto: ")) {
@@ -522,7 +685,8 @@ public class PrimaryController {
                                 //singlePlaylistData.add(nuovaTraccia);
                             }
                         }
-                    }
+                        songTableView.getSelectionModel().clearSelection();
+                    }*/
                 } catch (IllegalArgumentException ex) {
                     Alert alert = new Alert(Alert.AlertType.ERROR, "Errore di inserimento: " + ex.getMessage());
                     alert.showAndWait();
@@ -535,6 +699,15 @@ public class PrimaryController {
         // 8. INTERFACCIA REALE DI MODIFICA BRANO (US-03)
         if (btnEditTrack != null) {
             btnEditTrack.setOnAction(e -> {
+                // Disabilita modifica se siamo in una playlist
+                if (catalogTitleLabel != null && catalogTitleLabel.getText().startsWith("Playlist:")) {
+                    Alert alert = new Alert(Alert.AlertType.WARNING, 
+                        "Non è possibile modificare una traccia dall'interno di una playlist. Vai al catalogo generale.");
+                    alert.setTitle("Operazione non consentita");
+                    alert.setHeaderText(null);
+                    alert.showAndWait();
+                    return;
+                }
                 // Recuperiamo la canzone attualmente selezionata con un singolo click nella tabella
                 Traccia tracciaSelezionata = songTableView.getSelectionModel().getSelectedItem();
 
@@ -565,9 +738,12 @@ public class PrimaryController {
                         if (tracciaModificata != null) {
                             // Eseguiamo l'aggiornamento nel modello Singleton
                             Catalogo.getInstance().modificaTraccia(tracciaSelezionata, tracciaModificata);
-
+                            songTableView.getSelectionModel().clearSelection();
                             // L'uso della ObservableList aggiorna istantaneamente la tabella a schermo!
                         }
+                    }
+                    else {
+                        songTableView.getSelectionModel().clearSelection(); // ← aggiungi
                     }
                 } catch (IllegalArgumentException ex) {
                     Alert alert = new Alert(Alert.AlertType.ERROR, "Errore di validazione della modifica: " + ex.getMessage());
@@ -583,7 +759,7 @@ public class PrimaryController {
             btnAddToPlaylist.setOnAction(e -> onAggiungiTracciaPlaylist());
         }
 
-        // 9. INTERFACCIA DI RIMOZIONE BRANO DAL CATALOGO (US-05)
+    
 
         // 9. INTERFACCIA DI RIMOZIONE BRANO DAL CATALOGO (US-05)
 if (btnRemoveTrack != null) {
@@ -695,35 +871,44 @@ if (btnRemoveTrack != null) {
         onCambiaModalita();
     }
 
+
     private void onCambiaModalita() {
-        if (btnPlaylistLoop != null
-                && btnPlaylistLoop.isSelected()) {
-
+        if (btnPlaylistLoop != null && btnPlaylistLoop.isSelected()) {
             modalitaPlaylistSelezionata = new Loop();
-
-        } else if (btnPlaylistShuffle != null
-                && btnPlaylistShuffle.isSelected()) {
-
+        } else if (btnPlaylistShuffle != null && btnPlaylistShuffle.isSelected()) {
             modalitaPlaylistSelezionata = new Shuffle();
-
         } else {
             modalitaPlaylistSelezionata = new Sequenziale();
-
-            if (btnPlaylistSequenziale != null
-                    && !btnPlaylistSequenziale.isSelected()) {
+            if (btnPlaylistSequenziale != null && !btnPlaylistSequenziale.isSelected()) {
                 btnPlaylistSequenziale.setSelected(true);
             }
         }
 
-        /*
-         * La modalità viene applicata soltanto
-         * quando è aperta una playlist.
-         */
+    
         if (lettore != null) {
             lettore.setModalita(modalitaPlaylistSelezionata);
+    
+           
+    if (playlistCorrenteUi != null && !playlistCorrenteUi.getTracce().isEmpty()) {
+        if ("SEQUENZIALE".equals(modalitaPlaylistSelezionata.getNome()) ||
+            "LOOP".equals(modalitaPlaylistSelezionata.getNome())) {
+            // Non fermare la riproduzione corrente
+            // Solo prepara la coda per il prossimo play
+            if (btnPlay != null) btnPlay.setText(
+                lettore.getStato() == StatoLettore.PLAYING ? "||" : "▶"
+            );
         }
     }
 
+    // Resetta i bottoni singoli quando si cambia modalità playlist
+if (trackShuffleButton != null) {
+    trackShuffleButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #B3B3B3; -fx-font-size: 15px; -fx-cursor: hand;");
+}
+if (trackLoopButton != null) {
+    trackLoopButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #B3B3B3; -fx-font-size: 15px; -fx-cursor: hand;");
+}
+}
+    }
     private void mostraControlliModalitaPlaylist(boolean visibili) {
         if (playlistModeControls == null) {
             return;
@@ -826,6 +1011,7 @@ if (btnRemoveTrack != null) {
         }
 
         conferma.showAndWait();
+        songTableView.getSelectionModel().clearSelection();
     }
 
     private void onGeneraPlaylistAutomatica() {
@@ -900,13 +1086,10 @@ if (btnRemoveTrack != null) {
         }
 
         if (playlistCorrenteUi != null) {
-            lettore.sincronizzaConPlaylist(playlistCorrenteUi);
+            lettore.aggiornaCodeTracce(new ArrayList<>(playlistCorrenteUi.getTracce()));
         } else {
-            lettore.aggiornaCodeTracce(
-                    new ArrayList<>(Catalogo.getInstance().getTracce())
-            );
+            lettore.aggiornaCodeTracce(new ArrayList<>(Catalogo.getInstance().getTracce()));
         }
-
         lettore.setModalita(modalitaPlaylistSelezionata);
 
         lettore.tracciaCorrenteProperty().set(traccia);

@@ -86,6 +86,9 @@ public class Shuffle extends ModalitaRiproduzione {
         return disponibili;
     }
 
+    @Override
+public String getNome() { return "SHUFFLE"; }
+
     public void reset() {
         giaRiprodotte.clear();
     }

@@ -40,4 +40,7 @@ public class Sequenziale extends ModalitaRiproduzione {
 
         return tracce.get(indiceCorrente + 1);
     }
+
+    @Override
+public String getNome() { return "SEQUENZIALE"; }
 }
