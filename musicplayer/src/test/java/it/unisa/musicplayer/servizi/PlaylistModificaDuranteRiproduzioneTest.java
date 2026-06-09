@@ -7,6 +7,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -81,7 +82,6 @@ class PlaylistModificaDuranteRiproduzioneTest {
     void task1202AggiuntaTracciaAllaPlaylistCorrenteVieneAccodataNelLettore() {
         lettore.play();
         playlist.aggiungiTraccia(traccia3);
-        // Aggiorna manualmente la coda
         lettore.getCoda().add(traccia3);
         assertEquals(List.of(traccia1, traccia2, traccia3), lettore.getCoda());
         assertEquals(StatoLettore.PLAYING, lettore.getStato());
@@ -94,34 +94,48 @@ class PlaylistModificaDuranteRiproduzioneTest {
         lettore.aggiornaCodeTracce(new ArrayList<>(playlist.getTracce()));
         lettore.play();
         playlist.rimuoviTraccia(traccia2);
-        lettore.getCoda().remove(traccia2);
+        lettore.rimuoviTracciaDallaCoda(traccia2);
         assertEquals(List.of(traccia1, traccia3), lettore.getCoda());
         assertEquals(StatoLettore.PLAYING, lettore.getStato());
         assertEquals(traccia1, lettore.getTracciaCorrente());
     }
-
- 
 
     @Test
     void task1203RimozioneUnicaTracciaCorrenteFermaIlLettore() {
         playlist.rimuoviTraccia(traccia2);
         lettore.aggiornaCodeTracce(new ArrayList<>(playlist.getTracce()));
         lettore.play();
-        lettore.stop();
-        assertTrue(lettore.getCoda().isEmpty() || lettore.getStato() == StatoLettore.STOPPED);
+        playlist.rimuoviTraccia(traccia1);
+        lettore.rimuoviTracciaDallaCoda(traccia1);
+        assertTrue(lettore.getCoda().isEmpty());
+        assertNull(lettore.getTracciaCorrente());
+        assertEquals(StatoLettore.STOPPED, lettore.getStato());
     }
+
     @Test
     void task1203RimozioneTracciaCorrentePassaAllaSuccessiva() {
         playlist.aggiungiTraccia(traccia3);
         lettore.aggiornaCodeTracce(new ArrayList<>(playlist.getTracce()));
         lettore.play();
-        // Rimuovi dalla coda e imposta direttamente la prossima traccia
-        lettore.getCoda().remove(traccia1);
-        lettore.tracciaCorrenteProperty().set(traccia2);
+        playlist.rimuoviTraccia(traccia1);
+        lettore.rimuoviTracciaDallaCoda(traccia1);
         assertEquals(List.of(traccia2, traccia3), lettore.getCoda());
         assertEquals(StatoLettore.PLAYING, lettore.getStato());
         assertEquals(traccia2, lettore.getTracciaCorrente());
     }
+
+    @Test
+    void task1203RimozioneTracciaCorrenteDaCatalogoPassaAllaSuccessiva() {
+        playlist.aggiungiTraccia(traccia3);
+        lettore.aggiornaCodeTracce(new ArrayList<>(playlist.getTracce()));
+        lettore.play();
+        lettore.rimuoviTracciaDallaCoda(traccia1);
+        playlist.rimuoviTraccia(traccia1);
+        assertEquals(List.of(traccia2, traccia3), lettore.getCoda());
+        assertEquals(StatoLettore.PLAYING, lettore.getStato());
+        assertEquals(traccia2, lettore.getTracciaCorrente());
+    }
+
     @Test
     void task1203RimozioneTracciaDurantePausedSincronizzata() {
         playlist.aggiungiTraccia(traccia3);
@@ -129,27 +143,24 @@ class PlaylistModificaDuranteRiproduzioneTest {
         lettore.play();
         lettore.pausa();
         playlist.rimuoviTraccia(traccia2);
-        lettore.getCoda().remove(traccia2);
+        lettore.rimuoviTracciaDallaCoda(traccia2);
         assertEquals(List.of(traccia1, traccia3), lettore.getCoda());
         assertEquals(StatoLettore.PAUSED, lettore.getStato());
         assertEquals(traccia1, lettore.getTracciaCorrente());
     }
-    
-
 
     @Test
-void task1203RimozioneTracciaCorrenteDurantePausedPassaAllaSuccessiva() {
-    playlist.aggiungiTraccia(traccia3);
-    lettore.aggiornaCodeTracce(new ArrayList<>(playlist.getTracce()));
-    lettore.play();
-    lettore.pausa();
-    lettore.getCoda().remove(traccia1);
-    lettore.tracciaCorrenteProperty().set(traccia2);
-    lettore.play();
-    assertEquals(List.of(traccia2, traccia3), lettore.getCoda());
-    assertEquals(StatoLettore.PLAYING, lettore.getStato());
-    assertEquals(traccia2, lettore.getTracciaCorrente());
-}
+    void task1203RimozioneTracciaCorrenteDurantePausedPassaAllaSuccessiva() {
+        playlist.aggiungiTraccia(traccia3);
+        lettore.aggiornaCodeTracce(new ArrayList<>(playlist.getTracce()));
+        lettore.play();
+        lettore.pausa();
+        playlist.rimuoviTraccia(traccia1);
+        lettore.rimuoviTracciaDallaCoda(traccia1);
+        assertEquals(List.of(traccia2, traccia3), lettore.getCoda());
+        assertEquals(StatoLettore.PAUSED, lettore.getStato());
+        assertEquals(traccia2, lettore.getTracciaCorrente());
+    }
 
     private Traccia creaTraccia(String titolo) {
         return new Traccia(UUID.randomUUID().toString(), titolo, "Autore", "3:00", "Pop", 2024);

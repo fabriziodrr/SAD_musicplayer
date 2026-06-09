@@ -493,9 +493,12 @@ Catalogo.getInstance().getTracce().addListener(
         if (lettore.getStato() == StatoLettore.PLAYING || 
             lettore.getStato() == StatoLettore.PAUSED) {
             Traccia corrente = lettore.getTracciaCorrente();
+            java.util.List<Traccia> sorgenteCoda = playlistCorrenteUi != null
+                    ? new ArrayList<>(playlistCorrenteUi.getTracce())
+                    : new ArrayList<>(Catalogo.getInstance().getTracce());
             // Aggiorna la coda senza resettare la traccia corrente
             lettore.getCoda().clear();
-            lettore.getCoda().addAll(new ArrayList<>(Catalogo.getInstance().getTracce()));
+            lettore.getCoda().addAll(sorgenteCoda);
             // Mantieni la traccia corrente
             lettore.tracciaCorrenteProperty().set(corrente);
         }
@@ -790,6 +793,7 @@ if (btnRemoveTrack != null) {
 
             java.util.Optional<ButtonType> scelta = conferma.showAndWait();
             if (scelta.isPresent() && scelta.get() == ButtonType.OK) {
+                lettore.rimuoviTracciaDallaCoda(tracciaSelezionata);
                 playlistSelezionata.rimuoviTraccia(tracciaSelezionata);
                 CatalogoPlaylist.getInstance().eseguiSalvataggioAutomatico();
                 songTableView.refresh();
@@ -808,6 +812,7 @@ if (btnRemoveTrack != null) {
             java.util.Optional<ButtonType> scelta = conferma.showAndWait();
             if (scelta.isPresent() && scelta.get() == ButtonType.OK) {
                 try {
+                    lettore.rimuoviTracciaDallaCoda(tracciaSelezionata);
                     Catalogo.getInstance().rimuoviTraccia(tracciaSelezionata);
                     songTableView.getSelectionModel().clearSelection();
 

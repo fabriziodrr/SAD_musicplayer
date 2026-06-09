@@ -74,6 +74,37 @@ public class Lettore {
         tracciaCorrente.set(coda.isEmpty() ? null : coda.get(0));
     }
 
+    public void rimuoviTracciaDallaCoda(Traccia traccia) {
+        Objects.requireNonNull(traccia, "La traccia da rimuovere non può essere null");
+
+        if (!coda.contains(traccia)) {
+            return;
+        }
+
+        boolean tracciaInRiproduzione = Objects.equals(tracciaCorrente.get(), traccia);
+        Traccia prossima = tracciaInRiproduzione
+                ? modalita.prossimaTraccia(coda, tracciaCorrente.get())
+                : tracciaCorrente.get();
+
+        coda.remove(traccia);
+
+        if (!tracciaInRiproduzione) {
+            return;
+        }
+
+        if (Objects.equals(prossima, traccia) || !coda.contains(prossima)) {
+            prossima = null;
+        }
+
+        tracciaCorrente.set(prossima);
+        tempoTrascorso.set(0);
+
+        if (prossima == null) {
+            stato = StatoLettore.STOPPED;
+            statoProperty.set(StatoLettore.STOPPED);
+        }
+    }
+
     public void setModalita(ModalitaRiproduzione modalita) {
         this.modalita = Objects.requireNonNull(
                 modalita,
