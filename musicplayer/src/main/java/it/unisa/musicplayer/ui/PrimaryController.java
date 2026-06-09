@@ -561,45 +561,48 @@ Catalogo.getInstance().getTracce().addListener(
             }
         });
 
+       
+
         // 4. LOGICA DI SPOSTAMENTO SCHERMATE (ROUTING)
-        if (btnNavHome != null && mainTabPane != null) {
-            btnNavHome.setOnAction(e -> {
-                mainTabPane.getSelectionModel().select(0);
-                btnNavHome.setStyle("-fx-background-color: transparent; -fx-text-fill: #FFFFFF; -fx-font-weight: bold;");
-                btnNavStats.setStyle("-fx-background-color: transparent; -fx-text-fill: #B3B3B3;");
-                if (catalogTitleLabel != null) catalogTitleLabel.setText("Catalogo Globale");
-                if (songTableView != null) songTableView.setItems(Catalogo.getInstance().getTracce());
-                playlistCorrenteUi = null;
-                mostraControlliModalitaPlaylist(true);
-                if (sidebarListView != null) sidebarListView.getSelectionModel().clearSelection();
-            });
+if (btnNavHome != null && mainTabPane != null) {
+    btnNavHome.setOnAction(e -> {
+        mainTabPane.getSelectionModel().select(0);
+        btnNavHome.setStyle("-fx-background-color: transparent; -fx-text-fill: #FFFFFF; -fx-font-weight: bold;");
+        btnNavStats.setStyle("-fx-background-color: transparent; -fx-text-fill: #B3B3B3;");
+        if (catalogTitleLabel != null) catalogTitleLabel.setText("Catalogo Globale");
+        if (songTableView != null) songTableView.setItems(Catalogo.getInstance().getTracce());
+        playlistCorrenteUi = null;
+        mostraControlliModalitaPlaylist(true);
+        if (sidebarListView != null) sidebarListView.getSelectionModel().clearSelection();
+        // Mostra bottone modifica quando sei nel catalogo
+        if (btnEditTrack != null) {
+            btnEditTrack.setVisible(true);
+            btnEditTrack.setManaged(true);
         }
+    });
+}
 
-        if (btnNavStats != null && mainTabPane != null) {
-            btnNavStats.setOnAction(e -> {
-                mainTabPane.getSelectionModel().select(1);
-                btnNavStats.setStyle("-fx-background-color: transparent; -fx-text-fill: #FFFFFF; -fx-font-weight: bold;");
-                btnNavHome.setStyle("-fx-background-color: transparent; -fx-text-fill: #B3B3B3;");
-            });
+// 5. COMPORTAMENTO CLIC SIDEBAR PLAYLIST
+if (sidebarListView != null) {
+    sidebarListView.setItems(CatalogoPlaylist.getInstance().getPlaylists());
+    sidebarListView.setPlaceholder(new Label("Nessuna playlist presente"));
+    sidebarListView.getSelectionModel().selectedItemProperty().addListener((o, old, newVal) -> {
+        if (newVal != null) {
+            mainTabPane.getSelectionModel().select(0);
+            btnNavHome.setStyle("-fx-background-color: transparent; -fx-text-fill: #FFFFFF; -fx-font-weight: bold;");
+            btnNavStats.setStyle("-fx-background-color: transparent; -fx-text-fill: #B3B3B3;");
+            if (catalogTitleLabel != null) catalogTitleLabel.setText("Playlist: " + newVal.getNome());
+            if (songTableView != null) songTableView.setItems(newVal.getTracce());
+            playlistCorrenteUi = newVal;
+            lettore.setModalita(modalitaPlaylistSelezionata);
+            // Nascondi bottone modifica quando sei in una playlist
+            if (btnEditTrack != null) {
+                btnEditTrack.setVisible(false);
+                btnEditTrack.setManaged(false);
+            }
         }
-
-        // 5. COMPORTAMENTO CLIC SIDEBAR PLAYLIST (BINDING CON CATALOGOPLAYLIST)
-        if (sidebarListView != null) {
-            sidebarListView.setItems(CatalogoPlaylist.getInstance().getPlaylists());
-            sidebarListView.setPlaceholder(new Label("Nessuna playlist presente"));
-            sidebarListView.getSelectionModel().selectedItemProperty().addListener((o, old, newVal) -> {
-                if (newVal != null) {
-                    mainTabPane.getSelectionModel().select(0);
-                    btnNavHome.setStyle("-fx-background-color: transparent; -fx-text-fill: #FFFFFF; -fx-font-weight: bold;");
-                    btnNavStats.setStyle("-fx-background-color: transparent; -fx-text-fill: #B3B3B3;");
-                    if (catalogTitleLabel != null) catalogTitleLabel.setText("Playlist: " + newVal.getNome());
-                    if (songTableView != null) songTableView.setItems(newVal.getTracce());
-                    playlistCorrenteUi = newVal;
-                    lettore.setModalita(modalitaPlaylistSelezionata);
-                    // Non si ferma la riproduzione, la coda si aggiorna solo quando si preme Play
-                }
-            });
-        }
+    });
+}
 
         // 5B. PULSANTE CREAZIONE NUOVA PLAYLIST
         if (createNewPlaylistButton != null) {
