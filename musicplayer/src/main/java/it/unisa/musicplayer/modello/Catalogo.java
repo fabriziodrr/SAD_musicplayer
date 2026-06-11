@@ -79,6 +79,22 @@ public class Catalogo {
         aggiornaPlaylistAutomatiche(t);
     }
 
+    public void inserisciTraccia(Traccia t, int indice) {
+        if (t == null) {
+            throw new IllegalArgumentException("La traccia non può essere null");
+        }
+
+        if (contiene(t.getTitolo(), t.getAutore())) {
+            throw new IllegalArgumentException(
+                "Esiste già una traccia con titolo '" + t.getTitolo() +
+                "' e autore '" + t.getAutore() + "'");
+        }
+
+        // L'undo deve ripristinare il catalogo senza riattivare le playlist automatiche.
+        int indiceSicuro = Math.max(0, Math.min(indice, tracce.size()));
+        tracce.add(indiceSicuro, t);
+    }
+
     private void aggiornaPlaylistAutomatiche(Traccia t) {
         final String PREFISSO = "Auto - ";
         for (Playlist p : CatalogoPlaylist.getInstance().getPlaylists()) {

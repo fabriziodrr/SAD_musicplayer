@@ -11,11 +11,17 @@ import it.unisa.musicplayer.modello.CatalogoPlaylist;
 import it.unisa.musicplayer.modello.Playlist;
 import it.unisa.musicplayer.modello.Tag;
 import it.unisa.musicplayer.modello.Traccia;
+import it.unisa.musicplayer.servizi.AggiungiTracciaCatalogo;
+import it.unisa.musicplayer.servizi.AggiungiTracciaPlaylist;
 import it.unisa.musicplayer.servizi.GeneratorePlaylistAutomatica;
+import it.unisa.musicplayer.servizi.GestoreOperazioni;
 import it.unisa.musicplayer.servizi.Lettore;
 import it.unisa.musicplayer.servizi.Loop;
 import it.unisa.musicplayer.servizi.LoopSingola;
 import it.unisa.musicplayer.servizi.ModalitaRiproduzione;
+import it.unisa.musicplayer.servizi.Operazione;
+import it.unisa.musicplayer.servizi.RimuoviTracciaCatalogo;
+import it.unisa.musicplayer.servizi.RimuoviTracciaPlaylist;
 import it.unisa.musicplayer.servizi.Sequenziale;
 import it.unisa.musicplayer.servizi.SequenzialeSingola;
 import it.unisa.musicplayer.servizi.Shuffle;
@@ -63,6 +69,8 @@ public class PrimaryController {
     private Button btnRemoveTrack;
     @FXML
     private Button btnAddToPlaylist;
+    @FXML
+    private Button undoButton;
     @FXML
     private Button createNewPlaylistButton;
     @FXML private Button btnGeneraPlaylistAuto;
@@ -130,6 +138,7 @@ public class PrimaryController {
     private javafx.animation.Timeline timer;
     private Playlist playlistCorrenteUi;
     private Playlist playlistInRiproduzione;
+    private final GestoreOperazioni gestoreOperazioni = new GestoreOperazioni();
     private final ToggleGroup gruppoModalitaPlaylist = new ToggleGroup();
 
     private ModalitaRiproduzione modalitaPlaylistSelezionata =
@@ -218,6 +227,7 @@ public class PrimaryController {
 
         configuraControlliModalitaPlaylist();
         mostraControlliModalitaPlaylist(true);
+        configuraPulsanteUndo();
 
 // Binding label nome traccia
         if (currentTrackLabel != null) {
@@ -665,11 +675,11 @@ if (sidebarListView != null) {
                     if (result.isPresent() && result.get() == ButtonType.OK) {
                         Traccia nuovaTraccia = dialogController.getSongFromForm();
                         if (nuovaTraccia != null) {
-                            Catalogo.getInstance().aggiungiTraccia(nuovaTraccia);
+                            eseguiOperazione(new AggiungiTracciaCatalogo(Catalogo.getInstance(), nuovaTraccia));
                             // Se siamo in una playlist, aggiungi anche lì
                             if (playlistCorrenteUi != null && 
                                 catalogTitleLabel.getText().startsWith("Playlist:")) {
-                                playlistCorrenteUi.aggiungiTraccia(nuovaTraccia);
+                                eseguiOperazione(new AggiungiTracciaPlaylist(playlistCorrenteUi, nuovaTraccia));
                                 if (playlistCorrenteUi.equals(playlistInRiproduzione)) {
                                     lettore.aggiungiTracciaInCoda(nuovaTraccia);
                                 }
@@ -799,7 +809,7 @@ if (btnRemoveTrack != null) {
                 if (playlistSelezionata.equals(playlistInRiproduzione)) {
                     lettore.rimuoviTracciaDallaCoda(tracciaSelezionata);
                 }
-                playlistSelezionata.rimuoviTraccia(tracciaSelezionata);
+                eseguiOperazione(new RimuoviTracciaPlaylist(playlistSelezionata, tracciaSelezionata));
                 CatalogoPlaylist.getInstance().eseguiSalvataggioAutomatico();
                 songTableView.refresh();
             } else {
@@ -818,7 +828,11 @@ if (btnRemoveTrack != null) {
             if (scelta.isPresent() && scelta.get() == ButtonType.OK) {
                 try {
                     lettore.rimuoviTracciaDallaCoda(tracciaSelezionata);
-                    Catalogo.getInstance().rimuoviTraccia(tracciaSelezionata);
+                    eseguiOperazione(new RimuoviTracciaCatalogo(
+                            Catalogo.getInstance(),
+                            CatalogoPlaylist.getInstance(),
+                            tracciaSelezionata
+                    ));
                     songTableView.getSelectionModel().clearSelection();
 
                     if (currentTrackLabel != null &&
@@ -973,7 +987,10 @@ if (trackLoopButton != null) {
         int numeroTraccePrima = playlistScelta.getNumeroTracce();
 
         for (Traccia traccia : tracceSelezionate) {
-            playlistScelta.aggiungiTraccia(traccia);
+            boolean tracciaGiaPresente = playlistScelta.getTracce().contains(traccia);
+            if (!tracciaGiaPresente) {
+                eseguiOperazione(new AggiungiTracciaPlaylist(playlistScelta, traccia));
+            }
             if (playlistScelta.equals(playlistInRiproduzione)) {
                 lettore.aggiungiTracciaInCoda(traccia);
             }
@@ -1123,5 +1140,65 @@ if (trackLoopButton != null) {
             return new ArrayList<>(playlistInRiproduzione.getTracce());
         }
         return new ArrayList<>(Catalogo.getInstance().getTracce());
+    }
+
+    private void configuraPulsanteUndo() {
+        if (undoButton == null) {
+            return;
+        }
+
+        undoButton.setOnAction(e -> {
+            gestoreOperazioni.annullaUltimaOperazione();
+            sincronizzaCodaDopoUndo();
+            CatalogoPlaylist.getInstance().eseguiSalvataggioAutomatico();
+            if (songTableView != null) {
+                songTableView.refresh();
+                songTableView.getSelectionModel().clearSelection();
+            }
+            if (sidebarListView != null) {
+                sidebarListView.refresh();
+            }
+            aggiornaPulsanteUndo();
+        });
+
+        aggiornaPulsanteUndo();
+    }
+
+    private void eseguiOperazione(Operazione operazione) {
+        gestoreOperazioni.eseguiOperazione(operazione);
+        aggiornaPulsanteUndo();
+    }
+
+    private void aggiornaPulsanteUndo() {
+        if (undoButton == null) {
+            return;
+        }
+
+        boolean puoAnnullare = gestoreOperazioni.puoAnnullare();
+        undoButton.setDisable(!puoAnnullare);
+        undoButton.setText(puoAnnullare
+                ? "↶ Annulla: " + gestoreOperazioni.getDescrizioneUltimaOperazione()
+                : "↶ Annulla");
+    }
+
+    private void sincronizzaCodaDopoUndo() {
+        if (lettore == null
+                || lettore.getStato() == StatoLettore.STOPPED
+                || lettore.getTracciaCorrente() == null) {
+            return;
+        }
+
+        Traccia corrente = lettore.getTracciaCorrente();
+        List<Traccia> codaAggiornata = creaCodaRiproduzioneCorrente();
+
+        // Dopo un undo la coda deve riflettere la sorgente in riproduzione.
+        lettore.getCoda().clear();
+        lettore.getCoda().addAll(codaAggiornata);
+
+        if (codaAggiornata.contains(corrente)) {
+            lettore.tracciaCorrenteProperty().set(corrente);
+        } else {
+            lettore.aggiornaCodeTracce(codaAggiornata);
+        }
     }
 }

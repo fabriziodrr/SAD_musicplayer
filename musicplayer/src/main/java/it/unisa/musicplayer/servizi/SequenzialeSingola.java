@@ -4,7 +4,7 @@ import java.util.List;
 
 import it.unisa.musicplayer.modello.Traccia;
 
-public class SequenzialeSingola extends ModalitaRiproduzione {
+public class SequenzialeSingola extends Sequenziale {
 
     @Override
     public Traccia prossimaTraccia(List<Traccia> tracce, Traccia corrente) {

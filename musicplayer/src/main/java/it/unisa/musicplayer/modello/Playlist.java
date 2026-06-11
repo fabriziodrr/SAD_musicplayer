@@ -63,6 +63,18 @@ public class Playlist {
         }
     }
 
+    public void inserisciTraccia(Traccia t, int indice) {
+        Objects.requireNonNull(t, "La traccia non può essere null");
+        if (idTracce.contains(t.getId())) {
+            return;
+        }
+
+        // L'indice viene normalizzato per ripristinare la posizione più vicina possibile.
+        int indiceSicuro = Math.max(0, Math.min(indice, tracce.size()));
+        idTracce.add(indiceSicuro, t.getId());
+        tracce.add(indiceSicuro, t);
+    }
+
     public void rimuoviTraccia(Traccia t) {
         Objects.requireNonNull(t, "La traccia non può essere null");
         idTracce.remove(t.getId());
