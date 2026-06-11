@@ -29,10 +29,14 @@
    </padding>
 
    <top>
-      <HBox alignment="CENTER_LEFT" spacing="18.0" styleClass="top-bar" BorderPane.alignment="CENTER">
+      <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="top-bar" BorderPane.alignment="CENTER">
          <children>
-            <Button fx:id="btnNavHome" mnemonicParsing="false" styleClass="nav-button, nav-button-active" text="Home (Catalogo)" />
-            <Button fx:id="btnNavStats" mnemonicParsing="false" styleClass="nav-button" text="Statistiche" />
+            <HBox alignment="CENTER_LEFT" spacing="4.0" styleClass="nav-switcher">
+               <children>
+                  <Button fx:id="btnNavHome" mnemonicParsing="false" styleClass="nav-button, nav-button-active" text="Catalogo" />
+                  <Button fx:id="btnNavStats" mnemonicParsing="false" styleClass="nav-button" text="Statistiche" />
+               </children>
+            </HBox>
             <Region HBox.hgrow="ALWAYS" />
             <Button fx:id="undoButton" mnemonicParsing="false" styleClass="pill-button" text="↶ Annulla" />
          </children>
@@ -40,11 +44,11 @@
    </top>
 
    <left>
-      <VBox minWidth="160.0" prefWidth="210.0" spacing="12.0" styleClass="surface" BorderPane.alignment="CENTER">
+      <VBox minWidth="170.0" prefWidth="230.0" spacing="14.0" styleClass="surface, playlist-sidebar" BorderPane.alignment="CENTER">
          <children>
             <HBox alignment="CENTER_LEFT" spacing="8.0">
                <children>
-                  <Label styleClass="section-subtitle" text="LE TUE PLAYLIST" />
+                  <Label styleClass="section-subtitle" text="PLAYLIST" />
                   <Region HBox.hgrow="ALWAYS" />
                   <Button fx:id="createNewPlaylistButton" mnemonicParsing="false" styleClass="icon-button" text="+" />
                   <Button fx:id="btnGeneraPlaylistAuto" mnemonicParsing="false" styleClass="icon-button" text="⚡" />
@@ -75,14 +79,14 @@
                                  </children>
                               </VBox>
                               <Region HBox.hgrow="ALWAYS" />
-                              <HBox alignment="CENTER_RIGHT" spacing="8.0">
-                                 <children>
-                                    <Button fx:id="btnOpenMockDialog" mnemonicParsing="false" styleClass="pill-button" text="+ Aggiungi" />
-                                    <Button fx:id="btnAddToPlaylist" mnemonicParsing="false" styleClass="pill-button" text="+ In playlist" />
-                                    <Button fx:id="btnEditTrack" mnemonicParsing="false" styleClass="pill-button" text="✏ Modifica" />
-                                    <Button fx:id="btnRemoveTrack" mnemonicParsing="false" styleClass="pill-button, danger-button" text="✕ Rimuovi" />
-                                 </children>
-                              </HBox>
+                               <HBox alignment="CENTER_RIGHT" spacing="8.0" styleClass="action-toolbar">
+                                  <children>
+                                     <Button fx:id="btnOpenMockDialog" mnemonicParsing="false" styleClass="action-button, action-button-primary" text="♪ Brano" />
+                                     <Button fx:id="btnAddToPlaylist" mnemonicParsing="false" styleClass="action-button, action-button-secondary" text="＋ Playlist" />
+                                     <Button fx:id="btnEditTrack" mnemonicParsing="false" styleClass="action-button, action-button-secondary" text="✎ Modifica" />
+                                     <Button fx:id="btnRemoveTrack" mnemonicParsing="false" styleClass="action-button, action-button-danger" text="✕ Rimuovi" />
+                                  </children>
+                               </HBox>
                            </children>
                         </HBox>
 
@@ -90,59 +94,59 @@
                         <HBox fx:id="playlistModeControls"
                               alignment="CENTER_LEFT"
                               managed="true"
-                              spacing="8.0"
+                              spacing="10.0"
+                              styleClass="mode-row"
                               visible="true">
 
-                           <children>
-                              <ToggleButton fx:id="btnPlaylistSequenziale"
-                                            accessibleText="Modalità sequenziale"
-                                            maxHeight="38.0"
-                                            maxWidth="38.0"
-                                            minHeight="38.0"
-                                            minWidth="38.0"
-                                            mnemonicParsing="false"
-                                            prefHeight="38.0"
-                                            prefWidth="38.0"
-                                            styleClass="player-control-button, playlist-mode-button"
-                                            text="→">
+                            <children>
+                               <Label styleClass="mode-label" text="Riproduzione" />
+                               <HBox alignment="CENTER_LEFT" spacing="0.0" styleClass="mode-switcher">
+                                  <children>
+                               <ToggleButton fx:id="btnPlaylistSequenziale"
+                                             accessibleText="Modalità sequenziale"
+                                             maxHeight="34.0"
+                                             minHeight="34.0"
+                                             mnemonicParsing="false"
+                                             prefHeight="34.0"
+                                             prefWidth="104.0"
+                                             styleClass="player-control-button, playlist-mode-button"
+                                             text="→ Sequenza">
                                  <tooltip>
                                     <Tooltip text="Sequenziale" />
                                  </tooltip>
                               </ToggleButton>
 
-                              <ToggleButton fx:id="btnPlaylistLoop"
-                                            accessibleText="Modalità loop"
-                                            maxHeight="38.0"
-                                            maxWidth="38.0"
-                                            minHeight="38.0"
-                                            minWidth="38.0"
-                                            mnemonicParsing="false"
-                                            prefHeight="38.0"
-                                            prefWidth="38.0"
-                                            styleClass="player-control-button, playlist-mode-button"
-                                            text="↻">
+                               <ToggleButton fx:id="btnPlaylistLoop"
+                                             accessibleText="Modalità loop"
+                                             maxHeight="34.0"
+                                             minHeight="34.0"
+                                             mnemonicParsing="false"
+                                             prefHeight="34.0"
+                                             prefWidth="82.0"
+                                             styleClass="player-control-button, playlist-mode-button"
+                                             text="↻ Loop">
                                  <tooltip>
                                     <Tooltip text="Loop" />
                                  </tooltip>
                               </ToggleButton>
 
-                              <ToggleButton fx:id="btnPlaylistShuffle"
-                                            accessibleText="Modalità shuffle"
-                                            maxHeight="38.0"
-                                            maxWidth="38.0"
-                                            minHeight="38.0"
-                                            minWidth="38.0"
-                                            mnemonicParsing="false"
-                                            prefHeight="38.0"
-                                            prefWidth="38.0"
-                                            styleClass="player-control-button, playlist-mode-button"
-                                            text="🔀">
+                               <ToggleButton fx:id="btnPlaylistShuffle"
+                                             accessibleText="Modalità shuffle"
+                                             maxHeight="34.0"
+                                             minHeight="34.0"
+                                             mnemonicParsing="false"
+                                             prefHeight="34.0"
+                                             prefWidth="90.0"
+                                             styleClass="player-control-button, playlist-mode-button"
+                                             text="⇄ Shuffle">
                                  <tooltip>
                                     <Tooltip text="Shuffle" />
                                  </tooltip>
-                              </ToggleButton>
-                           </children>
-                        </HBox>
+                               </ToggleButton>
+                                  </children>
+                               </HBox>
+                            </children>
+                         </HBox>
 
                         <TableView fx:id="songTableView" styleClass="song-table" VBox.vgrow="ALWAYS">
                            <columns>

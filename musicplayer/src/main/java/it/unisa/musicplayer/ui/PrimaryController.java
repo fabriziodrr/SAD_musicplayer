@@ -577,8 +577,7 @@ Catalogo.getInstance().getTracce().addListener(
 if (btnNavHome != null && mainTabPane != null) {
     btnNavHome.setOnAction(e -> {
         mainTabPane.getSelectionModel().select(0);
-        btnNavHome.setStyle("-fx-background-color: transparent; -fx-text-fill: #FFFFFF; -fx-font-weight: bold;");
-        btnNavStats.setStyle("-fx-background-color: transparent; -fx-text-fill: #B3B3B3;");
+        aggiornaNavigazioneAttiva(btnNavHome);
         if (catalogTitleLabel != null) catalogTitleLabel.setText("Catalogo Globale");
         if (songTableView != null) songTableView.setItems(Catalogo.getInstance().getTracce());
         playlistCorrenteUi = null;
@@ -592,6 +591,14 @@ if (btnNavHome != null && mainTabPane != null) {
     });
 }
 
+if (btnNavStats != null && mainTabPane != null) {
+    btnNavStats.setOnAction(e -> {
+        mainTabPane.getSelectionModel().select(1);
+        aggiornaNavigazioneAttiva(btnNavStats);
+        if (sidebarListView != null) sidebarListView.getSelectionModel().clearSelection();
+    });
+}
+
 // 5. COMPORTAMENTO CLIC SIDEBAR PLAYLIST
 if (sidebarListView != null) {
     sidebarListView.setItems(CatalogoPlaylist.getInstance().getPlaylists());
@@ -599,8 +606,7 @@ if (sidebarListView != null) {
     sidebarListView.getSelectionModel().selectedItemProperty().addListener((o, old, newVal) -> {
         if (newVal != null) {
             mainTabPane.getSelectionModel().select(0);
-            btnNavHome.setStyle("-fx-background-color: transparent; -fx-text-fill: #FFFFFF; -fx-font-weight: bold;");
-            btnNavStats.setStyle("-fx-background-color: transparent; -fx-text-fill: #B3B3B3;");
+            aggiornaNavigazioneAttiva(btnNavHome);
             if (catalogTitleLabel != null) catalogTitleLabel.setText("Playlist: " + newVal.getNome());
             if (songTableView != null) songTableView.setItems(newVal.getTracce());
             playlistCorrenteUi = newVal;
@@ -627,7 +633,7 @@ if (sidebarListView != null) {
                     dialog.setTitle("Nuova Playlist");
                     dialog.getDialogPane().getButtonTypes().setAll(ButtonType.OK, ButtonType.CANCEL);
 
-                    java.util.Optional<ButtonType> result = dialog.showAndWait();
+                    java.util.Optional<ButtonType> result = mostraDialog(dialog);
                     if (result.isPresent() && result.get() == ButtonType.OK) {
                         try {
                             String nome = dialogController.getNomePlaylist();
@@ -635,7 +641,7 @@ if (sidebarListView != null) {
                             CatalogoPlaylist.getInstance().aggiungiPlaylist(nuova);
                         } catch (IllegalArgumentException ex) {
                             Alert alert = new Alert(Alert.AlertType.ERROR, ex.getMessage());
-                            alert.showAndWait();
+                            mostraAlert(alert);
                         }
                     }
                 } catch (Exception ex) {
@@ -670,7 +676,7 @@ if (sidebarListView != null) {
                     dialog.setTitle("Gestione Catalogo - Aggiungi");
                     dialog.getDialogPane().getButtonTypes().setAll(ButtonType.OK, ButtonType.CANCEL);
 
-                    java.util.Optional<ButtonType> result = dialog.showAndWait();
+                    java.util.Optional<ButtonType> result = mostraDialog(dialog);
 
                     if (result.isPresent() && result.get() == ButtonType.OK) {
                         Traccia nuovaTraccia = dialogController.getSongFromForm();
@@ -705,7 +711,7 @@ if (sidebarListView != null) {
                     }*/
                 } catch (IllegalArgumentException ex) {
                     Alert alert = new Alert(Alert.AlertType.ERROR, "Errore di inserimento: " + ex.getMessage());
-                    alert.showAndWait();
+                    mostraAlert(alert);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -721,7 +727,7 @@ if (sidebarListView != null) {
                         "Non è possibile modificare una traccia dall'interno di una playlist. Vai al catalogo generale.");
                     alert.setTitle("Operazione non consentita");
                     alert.setHeaderText(null);
-                    alert.showAndWait();
+                    mostraAlert(alert);
                     return;
                 }
                 // Recuperiamo la canzone attualmente selezionata con un singolo click nella tabella
@@ -729,7 +735,7 @@ if (sidebarListView != null) {
 
                 if (tracciaSelezionata == null) {
                     Alert alert = new Alert(Alert.AlertType.WARNING, "Seleziona prima un brano dalla tabella con un singolo click!");
-                    alert.showAndWait();
+                    mostraAlert(alert);
                     return;
                 }
 
@@ -746,7 +752,7 @@ if (sidebarListView != null) {
                     dialog.setTitle("Gestione Catalogo - Modifica Brano");
                     dialog.getDialogPane().getButtonTypes().setAll(ButtonType.OK, ButtonType.CANCEL);
 
-                    java.util.Optional<ButtonType> result = dialog.showAndWait();
+                    java.util.Optional<ButtonType> result = mostraDialog(dialog);
                     if (result.isPresent() && result.get() == ButtonType.OK) {
                         // Estraiamo i testi aggiornati mantenendo l'ID originale immutato
                         Traccia tracciaModificata = dialogController.getSongFromForm();
@@ -763,7 +769,7 @@ if (sidebarListView != null) {
                     }
                 } catch (IllegalArgumentException ex) {
                     Alert alert = new Alert(Alert.AlertType.ERROR, "Errore di validazione della modifica: " + ex.getMessage());
-                    alert.showAndWait();
+                    mostraAlert(alert);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -786,7 +792,7 @@ if (btnRemoveTrack != null) {
             Alert alert = new Alert(Alert.AlertType.WARNING, "Seleziona prima una traccia dalla tabella.");
             alert.setTitle("Nessuna traccia selezionata");
             alert.setHeaderText(null);
-            alert.showAndWait();
+            mostraAlert(alert);
             return;
         }
 
@@ -804,7 +810,7 @@ if (btnRemoveTrack != null) {
                 "\" verrà rimossa dalla playlist \"" + playlistSelezionata.getNome() + 
                 "\" ma rimarrà nel catalogo generale.");
 
-            java.util.Optional<ButtonType> scelta = conferma.showAndWait();
+            java.util.Optional<ButtonType> scelta = mostraDialog(conferma);
             if (scelta.isPresent() && scelta.get() == ButtonType.OK) {
                 if (playlistSelezionata.equals(playlistInRiproduzione)) {
                     lettore.rimuoviTracciaDallaCoda(tracciaSelezionata);
@@ -824,7 +830,7 @@ if (btnRemoveTrack != null) {
             conferma.setContentText("La traccia \"" + tracciaSelezionata.getTitolo() + 
                 "\" verrà rimossa dal catalogo e da tutte le playlist in cui è presente.");
 
-            java.util.Optional<ButtonType> scelta = conferma.showAndWait();
+            java.util.Optional<ButtonType> scelta = mostraDialog(conferma);
             if (scelta.isPresent() && scelta.get() == ButtonType.OK) {
                 try {
                     lettore.rimuoviTracciaDallaCoda(tracciaSelezionata);
@@ -843,7 +849,7 @@ if (btnRemoveTrack != null) {
                     Alert alert = new Alert(Alert.AlertType.ERROR, ex.getMessage());
                     alert.setTitle("Errore eliminazione");
                     alert.setHeaderText(null);
-                    alert.showAndWait();
+                    mostraAlert(alert);
                 }
             } else {
                 songTableView.getSelectionModel().clearSelection();
@@ -953,7 +959,7 @@ if (trackLoopButton != null) {
             );
             alert.setTitle("Nessuna traccia selezionata");
             alert.setHeaderText(null);
-            alert.showAndWait();
+            mostraAlert(alert);
             return;
         }
 
@@ -964,7 +970,7 @@ if (trackLoopButton != null) {
             );
             alert.setTitle("Nessuna playlist disponibile");
             alert.setHeaderText(null);
-            alert.showAndWait();
+            mostraAlert(alert);
             return;
         }
 
@@ -977,7 +983,7 @@ if (trackLoopButton != null) {
         dialog.setHeaderText("Scegli la playlist di destinazione");
         dialog.setContentText("Playlist:");
 
-        java.util.Optional<Playlist> risultato = dialog.showAndWait();
+        java.util.Optional<Playlist> risultato = mostraDialog(dialog);
 
         if (risultato.isEmpty()) {
             return;
@@ -1040,7 +1046,7 @@ if (trackLoopButton != null) {
             );
         }
 
-        conferma.showAndWait();
+        mostraAlert(conferma);
         songTableView.getSelectionModel().clearSelection();
     }
 
@@ -1050,7 +1056,7 @@ if (trackLoopButton != null) {
         criterioDialog.setHeaderText("Scegli il criterio di generazione");
         criterioDialog.setContentText("Filtra per:");
 
-        Optional<String> criterio = criterioDialog.showAndWait();
+        Optional<String> criterio = mostraDialog(criterioDialog);
         if (!criterio.isPresent()) return;
 
         Catalogo catalogo = Catalogo.getInstance();
@@ -1060,14 +1066,14 @@ if (trackLoopButton != null) {
             List<String> generi = catalogo.getTracce().stream()
                     .map(Traccia::getGenere).distinct().sorted().collect(Collectors.toList());
             if (generi.isEmpty()) {
-                new Alert(Alert.AlertType.WARNING, "Nessuna traccia nel catalogo.").showAndWait();
+                mostraAlert(new Alert(Alert.AlertType.WARNING, "Nessuna traccia nel catalogo."));
                 return;
             }
             ChoiceDialog<String> genereDialog = new ChoiceDialog<>(generi.get(0), generi);
             genereDialog.setTitle("Genera per Genere");
             genereDialog.setHeaderText("Seleziona il genere");
             genereDialog.setContentText("Genere:");
-            Optional<String> genere = genereDialog.showAndWait();
+            Optional<String> genere = mostraDialog(genereDialog);
             if (!genere.isPresent()) return;
             aggiungiPlaylistGenerata(generatore.generaPerGenere(catalogo, genere.get()));
 
@@ -1075,14 +1081,14 @@ if (trackLoopButton != null) {
             List<Integer> anni = catalogo.getTracce().stream()
                     .map(Traccia::getAnno).distinct().sorted().collect(Collectors.toList());
             if (anni.isEmpty()) {
-                new Alert(Alert.AlertType.WARNING, "Nessuna traccia nel catalogo.").showAndWait();
+                mostraAlert(new Alert(Alert.AlertType.WARNING, "Nessuna traccia nel catalogo."));
                 return;
             }
             ChoiceDialog<Integer> annoDialog = new ChoiceDialog<>(anni.get(0), anni);
             annoDialog.setTitle("Genera per Anno");
             annoDialog.setHeaderText("Seleziona l'anno");
             annoDialog.setContentText("Anno:");
-            Optional<Integer> anno = annoDialog.showAndWait();
+            Optional<Integer> anno = mostraDialog(annoDialog);
             if (!anno.isPresent()) return;
             aggiungiPlaylistGenerata(generatore.generaPerAnno(catalogo, anno.get()));
         }
@@ -1094,13 +1100,13 @@ if (trackLoopButton != null) {
             Alert info = new Alert(Alert.AlertType.INFORMATION,
                     "Playlist \"" + playlist.getNome() + "\" generata con " + playlist.getNumeroTracce() + " brani.");
             info.setHeaderText(null);
-            info.showAndWait();
+            mostraAlert(info);
         } catch (IllegalArgumentException ex) {
             Alert conferma = new Alert(Alert.AlertType.CONFIRMATION);
             conferma.setTitle("Playlist già esistente");
             conferma.setHeaderText("Esiste già \"" + playlist.getNome() + "\"");
             conferma.setContentText("Vuoi sovrascriverla con i dati aggiornati?");
-            Optional<ButtonType> r = conferma.showAndWait();
+            Optional<ButtonType> r = mostraDialog(conferma);
             if (r.isPresent() && r.get() == ButtonType.OK) {
                 CatalogoPlaylist.getInstance().rimuoviPlaylist(playlist.getNome());
                 CatalogoPlaylist.getInstance().aggiungiPlaylist(playlist);
@@ -1199,6 +1205,46 @@ if (trackLoopButton != null) {
             lettore.tracciaCorrenteProperty().set(corrente);
         } else {
             lettore.aggiornaCodeTracce(codaAggiornata);
+        }
+    }
+
+    private void aggiornaNavigazioneAttiva(Button bottoneAttivo) {
+        aggiornaStatoNavButton(btnNavHome, bottoneAttivo == btnNavHome);
+        aggiornaStatoNavButton(btnNavStats, bottoneAttivo == btnNavStats);
+    }
+
+    private void aggiornaStatoNavButton(Button bottone, boolean attivo) {
+        if (bottone == null) {
+            return;
+        }
+
+        bottone.setStyle("");
+        bottone.getStyleClass().remove("nav-button-active");
+        if (attivo) {
+            bottone.getStyleClass().add("nav-button-active");
+        }
+    }
+
+    private <T> Optional<T> mostraDialog(Dialog<T> dialog) {
+        applicaTemaDialog(dialog);
+        return dialog.showAndWait();
+    }
+
+    private void mostraAlert(Alert alert) {
+        applicaTemaDialog(alert);
+        alert.showAndWait();
+    }
+
+    private void applicaTemaDialog(Dialog<?> dialog) {
+        DialogPane dialogPane = dialog.getDialogPane();
+        String css = getClass().getResource("/css/app.css").toExternalForm();
+
+        // Gli Alert JavaFX hanno una scena separata, quindi il tema va applicato al DialogPane.
+        if (!dialogPane.getStylesheets().contains(css)) {
+            dialogPane.getStylesheets().add(css);
+        }
+        if (!dialogPane.getStyleClass().contains("dialog-pane")) {
+            dialogPane.getStyleClass().add("dialog-pane");
         }
     }
 }
