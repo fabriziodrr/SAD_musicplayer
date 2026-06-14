@@ -283,6 +283,10 @@
     -fx-background-radius: 12;
 }
 
+.dialog-pane .content-text {
+    -fx-wrap-text: true;
+}
+
 .dialog-pane > .content.label,
 .dialog-pane .header-panel .label {
     -fx-text-fill: #ffffff;

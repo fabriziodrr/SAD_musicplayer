@@ -84,6 +84,10 @@
                                      <Button fx:id="btnOpenMockDialog" mnemonicParsing="false" styleClass="action-button, action-button-primary" text="♪ Brano" />
                                      <Button fx:id="btnAddToPlaylist" mnemonicParsing="false" styleClass="action-button, action-button-secondary" text="＋ Playlist" />
                                      <Button fx:id="btnEditTrack" mnemonicParsing="false" styleClass="action-button, action-button-secondary" text="✎ Modifica" />
+                                     <Button fx:id="btnSpostaSu" mnemonicParsing="false" 
+                                      styleClass="action-button, action-button-secondary" text="▲" />
+                                     <Button fx:id="btnSpostaGiu" mnemonicParsing="false" 
+                                      styleClass="action-button, action-button-secondary" text="▼" />
                                      <Button fx:id="btnRemoveTrack" mnemonicParsing="false" styleClass="action-button, action-button-danger" text="✕ Rimuovi" />
                                   </children>
                                </HBox>

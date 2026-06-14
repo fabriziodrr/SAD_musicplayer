@@ -71,6 +71,8 @@ public class PrimaryController {
     private Button btnAddToPlaylist;
     @FXML
     private Button undoButton;
+    @FXML private Button btnSpostaSu;
+    @FXML private Button btnSpostaGiu;
     @FXML
     private Button createNewPlaylistButton;
     @FXML private Button btnGeneraPlaylistAuto;
@@ -153,6 +155,10 @@ public class PrimaryController {
             songTableView.setPlaceholder(new Label("Nessuna traccia presente"));
             songTableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         }
+
+        // All'avvio nascondi i bottoni di riordino
+if (btnSpostaSu != null) { btnSpostaSu.setVisible(false); btnSpostaSu.setManaged(false); }
+if (btnSpostaGiu != null) { btnSpostaGiu.setVisible(false); btnSpostaGiu.setManaged(false); }
 
         // 2. CONFIGURAZIONE DELLE COLONNE CON I GETTER DELLA CLASSE TRACCIA
         titleColumn.setCellValueFactory(new PropertyValueFactory<>("titolo"));
@@ -334,31 +340,8 @@ public class PrimaryController {
             });
         }
 
-// Bottone Skip
-      /*  if (btnSkip != null) {
-            btnSkip.setOnAction(e -> {
-                if (lettore.getTracciaCorrente() == null) {
-                    return;
-                }
 
-                lettore.skip();
-
-                if (lettore.getTracciaCorrente() == null) {
-                    timer.pause();
-
-                    if (btnPlay != null) {
-                        btnPlay.setText("▶");
-                    }
-                } else {
-                    timer.play();
-
-                    if (btnPlay != null) {
-                        btnPlay.setText("||");
-                    }
-                }
-            });
-        }*/
-
+       //Bottone skip
         if (btnSkip != null) {
             btnSkip.setOnAction(e -> {
                 if (lettore.getTracciaCorrente() == null) return;
@@ -424,42 +407,7 @@ if (trackLoopButton != null) {
     });
 }
 
-// Timer
-       /* timer = new javafx.animation.Timeline(
-                new javafx.animation.KeyFrame(
-                        javafx.util.Duration.seconds(1),
-                        e -> {
-                            Traccia t = lettore.getTracciaCorrente();
-                            if (t != null) {
-                                String[] parti = t.getDurata().split(":");
-                                int durataTotale = Integer.parseInt(parti[0]) * 60 + Integer.parseInt(parti[1]);
-                                if (lettore.getTempoTrascorso() >= durataTotale) {
-                                    lettore.skip();
-                                    if (lettore.getTracciaCorrente() == null) {
-                                          // Se modalità sequenziale → si ferma
-                                     if ("SEQUENZIALE".equals(lettore.getModalita().getNome())) {
-                                     timer.pause();
-                                     btnPlay.setText("▶");
-                                     lettore.avanzaTempo(1); 
-                                    } else {
-                                        // Usa la playlist corrente se disponibile, altrimenti il catalogo
-                                        List<Traccia> coda = playlistCorrenteUi != null 
-                                            ? new ArrayList<>(playlistCorrenteUi.getTracce())
-                                            : new ArrayList<>(Catalogo.getInstance().getTracce());
-                                        lettore.aggiornaCodeTracce(coda);
-                                        lettore.play();
-                                        timer.play();
-                                        btnPlay.setText("||");
-                                    }                                   
-                                } else {
-                                    lettore.avanzaTempo(1); 
-                                }
-                            }
-                            }
-                        }
-                )
-        );
-        timer.setCycleCount(javafx.animation.Animation.INDEFINITE);*/
+
 
         timer = new javafx.animation.Timeline(
             new javafx.animation.KeyFrame(
@@ -510,6 +458,23 @@ Catalogo.getInstance().getTracce().addListener(
             lettore.tracciaCorrenteProperty().set(corrente);
         }
     }
+);
+
+//RIORDINO PLAYLIST TASK 19.4
+CatalogoPlaylist.getInstance().getPlaylists().forEach(p -> 
+    p.getTracce().addListener((javafx.collections.ListChangeListener<Traccia>) change -> {
+        if (playlistInRiproduzione != null && 
+            playlistInRiproduzione.equals(p) &&
+            lettore.getStato() != StatoLettore.STOPPED) {
+            
+            Traccia corrente = lettore.getTracciaCorrente();
+            List<Traccia> nuovaCoda = new ArrayList<>(p.getTracce());
+            lettore.getCoda().clear();
+            lettore.getCoda().addAll(nuovaCoda);
+            // Mantieni la traccia corrente senza interrompere
+            lettore.tracciaCorrenteProperty().set(corrente);
+        }
+    })
 );
 
 // Evidenzia la traccia corrente nella tabella
@@ -588,6 +553,8 @@ if (btnNavHome != null && mainTabPane != null) {
             btnEditTrack.setVisible(true);
             btnEditTrack.setManaged(true);
         }
+        if (btnSpostaSu != null) { btnSpostaSu.setVisible(false); btnSpostaSu.setManaged(false); }
+        if (btnSpostaGiu != null) { btnSpostaGiu.setVisible(false); btnSpostaGiu.setManaged(false); }
     });
 }
 
@@ -598,6 +565,8 @@ if (btnNavStats != null && mainTabPane != null) {
         if (sidebarListView != null) sidebarListView.getSelectionModel().clearSelection();
     });
 }
+
+
 
 // 5. COMPORTAMENTO CLIC SIDEBAR PLAYLIST
 if (sidebarListView != null) {
@@ -616,6 +585,8 @@ if (sidebarListView != null) {
                 btnEditTrack.setVisible(false);
                 btnEditTrack.setManaged(false);
             }
+            if (btnSpostaSu != null) { btnSpostaSu.setVisible(true); btnSpostaSu.setManaged(true); }
+            if (btnSpostaGiu != null) { btnSpostaGiu.setVisible(true); btnSpostaGiu.setManaged(true); }
         }
     });
 }
@@ -639,6 +610,19 @@ if (sidebarListView != null) {
                             String nome = dialogController.getNomePlaylist();
                             Playlist nuova = new Playlist(nome);
                             CatalogoPlaylist.getInstance().aggiungiPlaylist(nuova);
+
+                            nuova.getTracce().addListener((javafx.collections.ListChangeListener<Traccia>) change -> {
+                                if (playlistInRiproduzione != null &&
+                                    playlistInRiproduzione.equals(nuova) &&
+                                    lettore.getStato() != StatoLettore.STOPPED) {
+                    
+                                    Traccia corrente = lettore.getTracciaCorrente();
+                                    lettore.getCoda().clear();
+                                    lettore.getCoda().addAll(new ArrayList<>(nuova.getTracce()));
+                                    lettore.tracciaCorrenteProperty().set(corrente);
+                                }
+                            });
+
                         } catch (IllegalArgumentException ex) {
                             Alert alert = new Alert(Alert.AlertType.ERROR, ex.getMessage());
                             mostraAlert(alert);
@@ -781,33 +765,58 @@ if (sidebarListView != null) {
             btnAddToPlaylist.setOnAction(e -> onAggiungiTracciaPlaylist());
         }
 
-    
+        //RIORDINO TRACCE (US-19)
+        if (btnSpostaSu != null) {
+            btnSpostaSu.setOnAction(e -> {
+                Traccia selezionata = songTableView.getSelectionModel().getSelectedItem();
+                if (selezionata == null) {
+                    Alert alert = new Alert(Alert.AlertType.WARNING, "Seleziona prima una traccia.");
+                    alert.setHeaderText(null);
+                    mostraAlert(alert);
+                    return;
+                }
+                if (playlistCorrenteUi != null) {
+                    playlistCorrenteUi.spostaSu(selezionata);
+                    songTableView.getSelectionModel().select(selezionata);
+                    songTableView.getSelectionModel().clearSelection(); 
+                    CatalogoPlaylist.getInstance().eseguiSalvataggioAutomatico();
+                }
+            });
+        }
+        
+        if (btnSpostaGiu != null) {
+            btnSpostaGiu.setOnAction(e -> {
+                Traccia selezionata = songTableView.getSelectionModel().getSelectedItem();
+                if (selezionata == null) {
+                    Alert alert = new Alert(Alert.AlertType.WARNING, "Seleziona prima una traccia.");
+                    alert.setHeaderText(null);
+                    mostraAlert(alert);
+                    return;
+                }
+                if (playlistCorrenteUi != null) {
+                    playlistCorrenteUi.spostaGiu(selezionata);
+                    songTableView.getSelectionModel().clearSelection();
+                    songTableView.getSelectionModel().select(selezionata);
+                    CatalogoPlaylist.getInstance().eseguiSalvataggioAutomatico();
+                }
+            });
+        }
 
-        // 9. INTERFACCIA DI RIMOZIONE BRANO DAL CATALOGO (US-05)
+   // 9. INTERFACCIA DI RIMOZIONE BRANO DAL CATALOGO (US-05)
 if (btnRemoveTrack != null) {
     btnRemoveTrack.setOnAction(e -> {
         Traccia tracciaSelezionata = songTableView.getSelectionModel().getSelectedItem();
-
-        if (tracciaSelezionata == null) {
-            Alert alert = new Alert(Alert.AlertType.WARNING, "Seleziona prima una traccia dalla tabella.");
-            alert.setTitle("Nessuna traccia selezionata");
-            alert.setHeaderText(null);
-            mostraAlert(alert);
-            return;
-        }
-
-        // Controlla se siamo in una playlist o nel catalogo
         Playlist playlistSelezionata = sidebarListView.getSelectionModel().getSelectedItem();
-        boolean siamoInPlaylist = playlistSelezionata != null && 
+        boolean siamoInPlaylist = playlistSelezionata != null &&
                                   catalogTitleLabel.getText().startsWith("Playlist:");
 
-        if (siamoInPlaylist) {
-            // Rimuovi solo dalla playlist
+        // CASO 1: siamo in una playlist e abbiamo selezionato una traccia → rimuovi traccia dalla playlist
+        if (siamoInPlaylist && tracciaSelezionata != null) {
             Alert conferma = new Alert(Alert.AlertType.CONFIRMATION);
             conferma.setTitle("Conferma rimozione");
             conferma.setHeaderText("Rimuovere dalla playlist?");
-            conferma.setContentText("La traccia \"" + tracciaSelezionata.getTitolo() + 
-                "\" verrà rimossa dalla playlist \"" + playlistSelezionata.getNome() + 
+            conferma.setContentText("La traccia \"" + tracciaSelezionata.getTitolo() +
+                "\" verrà rimossa dalla playlist \"" + playlistSelezionata.getNome() +
                 "\" ma rimarrà nel catalogo generale.");
 
             java.util.Optional<ButtonType> scelta = mostraDialog(conferma);
@@ -822,12 +831,43 @@ if (btnRemoveTrack != null) {
                 songTableView.getSelectionModel().clearSelection();
             }
 
-        } else {
-            // Rimuovi dal catalogo generale
+        // CASO 2: siamo in una playlist ma nessuna traccia selezionata → elimina la playlist
+        } else if (siamoInPlaylist && tracciaSelezionata == null) {
+            Alert conferma = new Alert(Alert.AlertType.CONFIRMATION);
+            conferma.setTitle("Elimina playlist");
+            conferma.setHeaderText("Eliminare la playlist?");
+            conferma.setContentText("La playlist \"" + playlistSelezionata.getNome() +
+                "\" verrà eliminata. Le tracce rimarranno nel catalogo generale.");
+
+            java.util.Optional<ButtonType> scelta = mostraDialog(conferma);
+            if (scelta.isPresent() && scelta.get() == ButtonType.OK) {
+                if (playlistSelezionata.equals(playlistInRiproduzione)) {
+                    lettore.stop();
+                    playlistInRiproduzione = null;
+                    timer.pause();
+                    if (btnPlay != null) btnPlay.setText("▶");
+                }
+                CatalogoPlaylist.getInstance().rimuoviPlaylist(playlistSelezionata.getNome());
+                CatalogoPlaylist.getInstance().eseguiSalvataggioAutomatico();
+                playlistCorrenteUi = null;
+                sidebarListView.getSelectionModel().clearSelection();
+                if (catalogTitleLabel != null) catalogTitleLabel.setText("Catalogo Globale");
+                if (songTableView != null) songTableView.setItems(Catalogo.getInstance().getTracce());
+                if (btnEditTrack != null) {
+                    btnEditTrack.setVisible(true);
+                    btnEditTrack.setManaged(true);
+                }
+                if (btnRemoveTrack != null) btnRemoveTrack.setText("✕ Rimuovi");
+                if (btnSpostaSu != null) { btnSpostaSu.setVisible(false); btnSpostaSu.setManaged(false); }
+                if (btnSpostaGiu != null) { btnSpostaGiu.setVisible(false); btnSpostaGiu.setManaged(false); }
+            }
+
+        // CASO 3: siamo nel catalogo generale con una traccia selezionata → rimuovi dal catalogo
+        } else if (!siamoInPlaylist && tracciaSelezionata != null) {
             Alert conferma = new Alert(Alert.AlertType.CONFIRMATION);
             conferma.setTitle("Conferma eliminazione");
             conferma.setHeaderText("Eliminare definitivamente la traccia?");
-            conferma.setContentText("La traccia \"" + tracciaSelezionata.getTitolo() + 
+            conferma.setContentText("La traccia \"" + tracciaSelezionata.getTitolo() +
                 "\" verrà rimossa dal catalogo e da tutte le playlist in cui è presente.");
 
             java.util.Optional<ButtonType> scelta = mostraDialog(conferma);
@@ -840,7 +880,6 @@ if (btnRemoveTrack != null) {
                             tracciaSelezionata
                     ));
                     songTableView.getSelectionModel().clearSelection();
-
                     if (currentTrackLabel != null &&
                             currentTrackLabel.getText().equals(tracciaSelezionata.getTitolo())) {
                         currentTrackLabel.setText("Seleziona un brano");
@@ -854,6 +893,13 @@ if (btnRemoveTrack != null) {
             } else {
                 songTableView.getSelectionModel().clearSelection();
             }
+
+        // CASO 4: catalogo generale, nessuna traccia selezionata → avviso
+        } else {
+            Alert alert = new Alert(Alert.AlertType.WARNING, "Seleziona prima una traccia o una playlist dalla tabella.");
+            alert.setTitle("Nessuna traccia selezionata");
+            alert.setHeaderText(null);
+            mostraAlert(alert);
         }
     });
 }
@@ -1246,5 +1292,12 @@ if (trackLoopButton != null) {
         if (!dialogPane.getStyleClass().contains("dialog-pane")) {
             dialogPane.getStyleClass().add("dialog-pane");
         }
+        dialogPane.setMinWidth(500);
+    dialogPane.setPrefWidth(500);
+    
+    javafx.scene.Node contentNode = dialogPane.lookup(".content");
+    if (contentNode instanceof javafx.scene.control.Label) {
+        ((javafx.scene.control.Label) contentNode).setWrapText(true);
+    }
     }
 }

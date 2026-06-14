@@ -1,15 +1,16 @@
 package it.unisa.musicplayer.modello;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Playlist {
@@ -85,6 +86,22 @@ public class Playlist {
         tracce.clear();
         for (String id : idTracce) {
             catalogo.cercaPerId(id).ifPresent(tracce::add);
+        }
+    }
+
+    public void spostaSu(Traccia t) {
+        int indice = tracce.indexOf(t);
+        if (indice > 0) {
+            tracce.remove(indice);
+            tracce.add(indice - 1, t);
+        }
+    }
+    
+    public void spostaGiu(Traccia t) {
+        int indice = tracce.indexOf(t);
+        if (indice >= 0 && indice < tracce.size() - 1) {
+            tracce.remove(indice);
+            tracce.add(indice + 1, t);
         }
     }
 
