@@ -21,13 +21,13 @@ public class GeneratorePlaylistAutomatica {
     ) {
         if (catalogo == null) {
             throw new IllegalArgumentException(
-                    "Il catalogo non pu+¶ essere null"
+                    "Il catalogo non pu√≤ essere null"
             );
         }
 
         if (genere == null || genere.trim().isEmpty()) {
             throw new IllegalArgumentException(
-                    "Il genere non pu+¶ essere null o vuoto"
+                    "Il genere non pu√≤ essere null o vuoto"
             );
         }
 
@@ -46,7 +46,7 @@ public class GeneratorePlaylistAutomatica {
     ) {
         if (catalogo == null) {
             throw new IllegalArgumentException(
-                    "Il catalogo non pu+¶ essere null"
+                    "Il catalogo non pu√≤ essere null"
             );
         }
 
@@ -68,13 +68,13 @@ public class GeneratorePlaylistAutomatica {
     ) {
         if (catalogo == null) {
             throw new IllegalArgumentException(
-                    "Il catalogo non pu+¶ essere null"
+                    "Il catalogo non pu√≤ essere null"
             );
         }
 
         if (tag == null) {
             throw new IllegalArgumentException(
-                    "Il tag non pu+¶ essere null"
+                    "Il tag non pu√≤ essere null"
             );
         }
 
@@ -131,12 +131,12 @@ public class GeneratorePlaylistAutomatica {
     // Sincronizzazione playlist automatiche per tag - US-18
 
     /**
-     * Aggiorna tutte le playlist automatiche per tag gi+· esistenti.
+     * Aggiorna tutte le playlist automatiche per tag gi√† esistenti.
      *
      * Una playlist mancante non viene creata automaticamente:
      * la creazione rimane conseguenza della scelta dell'utente.
      *
-     * Se una playlist automatica non ha pi+¶ tracce corrispondenti,
+     * Se una playlist automatica non ha pi√π tracce corrispondenti,
      * viene rimossa dal CatalogoPlaylist.
      *
      * @return numero di playlist modificate o eliminate
@@ -147,13 +147,13 @@ public class GeneratorePlaylistAutomatica {
     ) {
         if (catalogo == null) {
             throw new IllegalArgumentException(
-                    "Il catalogo non pu+¶ essere null"
+                    "Il catalogo non pu√≤ essere null"
             );
         }
 
         if (catalogoPlaylist == null) {
             throw new IllegalArgumentException(
-                    "Il catalogo playlist non pu+¶ essere null"
+                    "Il catalogo playlist non pu√≤ essere null"
             );
         }
 
@@ -182,7 +182,7 @@ public class GeneratorePlaylistAutomatica {
     /**
      * Sincronizza la playlist automatica relativa a un solo tag.
      *
-     * @return true se la playlist +ø stata aggiornata o eliminata
+     * @return true se la playlist √® stata aggiornata o eliminata
      */
     public boolean sincronizzaPlaylistPerTag(
             Catalogo catalogo,
@@ -191,19 +191,19 @@ public class GeneratorePlaylistAutomatica {
     ) {
         if (catalogo == null) {
             throw new IllegalArgumentException(
-                    "Il catalogo non pu+¶ essere null"
+                    "Il catalogo non pu√≤ essere null"
             );
         }
 
         if (catalogoPlaylist == null) {
             throw new IllegalArgumentException(
-                    "Il catalogo playlist non pu+¶ essere null"
+                    "Il catalogo playlist non pu√≤ essere null"
             );
         }
 
         if (tag == null) {
             throw new IllegalArgumentException(
-                    "Il tag non pu+¶ essere null"
+                    "Il tag non pu√≤ essere null"
             );
         }
 
@@ -251,7 +251,7 @@ public class GeneratorePlaylistAutomatica {
                 filtraPerTag(catalogo, tag);
 
         /*
-         * AC2: se nessuna traccia possiede pi+¶ il tag,
+         * AC2: se nessuna traccia possiede pi√π il tag,
          * la playlist automatica viene eliminata.
          */
         if (tracceCorrette.isEmpty()) {
@@ -276,7 +276,7 @@ public class GeneratorePlaylistAutomatica {
          * Ricostruisce il contenuto utilizzando gli oggetti
          * attualmente presenti nel catalogo.
          *
-         * Questo +ø importante perch+Æ modificaTraccia()
+         * Questo √® importante perch√© modificaTraccia()
          * sostituisce il vecchio oggetto Traccia con uno nuovo.
          */
         List<Traccia> vecchieTracce =
@@ -313,8 +313,8 @@ public class GeneratorePlaylistAutomatica {
                     tracceCorrette.get(i);
 
             /*
-             * Si controlla anche l'identit+· dell'oggetto:
-             * dopo una modifica, la traccia pu+¶ avere lo stesso ID
+             * Si controlla anche l'identit√† dell'oggetto:
+             * dopo una modifica, la traccia pu√≤ avere lo stesso ID
              * ma essere una nuova istanza.
              */
             if (presente != corretta) {
@@ -325,14 +325,14 @@ public class GeneratorePlaylistAutomatica {
         return true;
     }
 
-    // Utilit+·
+    // Utilit√†
 
     public String nomePlaylistAutomatica(
             Object criterio
     ) {
         if (criterio == null) {
             throw new IllegalArgumentException(
-                    "Il criterio non pu+¶ essere null"
+                    "Il criterio non pu√≤ essere null"
             );
         }
 
@@ -341,7 +341,7 @@ public class GeneratorePlaylistAutomatica {
 
         if (valore.isEmpty()) {
             throw new IllegalArgumentException(
-                    "Il criterio non pu+¶ essere vuoto"
+                    "Il criterio non pu√≤ essere vuoto"
             );
         }
 
@@ -351,7 +351,7 @@ public class GeneratorePlaylistAutomatica {
     public String nomePlaylistPerTag(Tag tag) {
         if (tag == null) {
             throw new IllegalArgumentException(
-                    "Il tag non pu+¶ essere null"
+                    "Il tag non pu√≤ essere null"
             );
         }
 
