@@ -1,8 +1,11 @@
 package it.unisa.musicplayer.modello;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ListChangeListener;
+import javafx.scene.control.Alert;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Optional;
 import it.unisa.musicplayer.servizi.GestoreFile;
@@ -36,22 +39,43 @@ public class Catalogo {
     // ── Stato ─────────────────────────────────────────────────────────────────
 
     private final ObservableList<Traccia> tracce;
+    private boolean caricamentoInCorso = false;
 
     /**
      * Confeziona le canzoni correnti dentro il Wrapper e lancia l'esportazione.
+     * In caso di errore I/O mostra un Alert all'utente.
      */
     public void eseguiSalvataggioAutomatico() {
+        if (caricamentoInCorso) return;
         DatiApplicazione pacchettoDati = DatiApplicazione.costruisci(
             new ArrayList<>(this.tracce),
             new ArrayList<>(CatalogoPlaylist.getInstance().getPlaylists())
         );
-        GestoreFile.esporta(pacchettoDati);
+        try {
+            GestoreFile.esporta(pacchettoDati);
+        } catch (IOException e) {
+            System.err.println("[ERRORE SAVE] Impossibile scrivere il file JSON: " + e.getMessage());
+            try {
+                Platform.runLater(() -> {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Errore di salvataggio");
+                    alert.setHeaderText("Impossibile salvare i dati");
+                    alert.setContentText("Si è verificato un errore durante il salvataggio:\n" + e.getMessage());
+                    alert.showAndWait();
+                });
+            } catch (Exception ignored) { }
+        }
     }
 
     public void caricaDaFile() {
-        DatiApplicazione dati = GestoreFile.importa();
-        if (dati.getCanzoni() != null && !dati.getCanzoni().isEmpty()) {
-            tracce.addAll(dati.getCanzoni());
+        caricamentoInCorso = true;
+        try {
+            DatiApplicazione dati = GestoreFile.importa();
+            if (dati.getCanzoni() != null && !dati.getCanzoni().isEmpty()) {
+                tracce.addAll(dati.getCanzoni());
+            }
+        } finally {
+            caricamentoInCorso = false;
         }
     }
 

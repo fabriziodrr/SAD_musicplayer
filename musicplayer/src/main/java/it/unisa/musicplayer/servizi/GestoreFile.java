@@ -21,21 +21,22 @@ public class GestoreFile {
     // Rintraccia dinamicamente la cartella Desktop dell'utente corrente. 
     private static String getDesktopPath() {
         String userHome = System.getProperty("user.home");
-        return userHome + File.separator + "Desktop" + File.separator + "catalogo_spotify.json";
+        return userHome + File.separator + "Desktop" + File.separator + "catalogo.json";
     }
 
     /**
      * Serializza l'oggetto DatiApplicazione salvandolo sul Desktop.
+     * Lancia IOException se la scrittura fallisce (es. permessi negati, disco pieno).
      */
-    public static void esporta(DatiApplicazione dati) {
-        try {
-            File fileDestinazione = new File(getDesktopPath());
-            mapper.writeValue(fileDestinazione, dati);
-            System.out.println("[SAVE OK] Catalogo e Playlist salvati sul Desktop: " + fileDestinazione.getAbsolutePath());
-        } catch (IOException e) {
-            System.err.println("[ERRORE SAVE] Impossibile scrivere il file JSON sul Desktop: " + e.getMessage());
-            e.printStackTrace();
-        }
+    public static void esporta(DatiApplicazione dati) throws IOException {
+        esportaSuPercorso(dati, getDesktopPath());
+    }
+
+    /** Variante con percorso esplicito, usata nei test. */
+    static void esportaSuPercorso(DatiApplicazione dati, String percorso) throws IOException {
+        File fileDestinazione = new File(percorso);
+        mapper.writeValue(fileDestinazione, dati);
+        System.out.println("[SAVE OK] Dati salvati in: " + fileDestinazione.getAbsolutePath());
     }
 
     
