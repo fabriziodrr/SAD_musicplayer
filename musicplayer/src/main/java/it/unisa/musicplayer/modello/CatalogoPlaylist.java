@@ -1,9 +1,12 @@
 package it.unisa.musicplayer.modello;
 
 import it.unisa.musicplayer.servizi.GestoreFile;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ListChangeListener;
+import javafx.scene.control.Alert;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class CatalogoPlaylist {
@@ -11,6 +14,7 @@ public class CatalogoPlaylist {
     private static CatalogoPlaylist instance;
 
     private final ObservableList<Playlist> playlists;
+    private boolean caricamentoInCorso = false;
 
     private CatalogoPlaylist() {
         this.playlists = FXCollections.observableArrayList();
@@ -27,20 +31,39 @@ public class CatalogoPlaylist {
     }
 
     public void eseguiSalvataggioAutomatico() {
+        if (caricamentoInCorso) return;
         DatiApplicazione dati = DatiApplicazione.costruisci(
             new ArrayList<>(Catalogo.getInstance().getTracce()),
             new ArrayList<>(this.playlists)
         );
-        GestoreFile.esporta(dati);
+        try {
+            GestoreFile.esporta(dati);
+        } catch (IOException e) {
+            System.err.println("[ERRORE SAVE] Impossibile scrivere il file JSON: " + e.getMessage());
+            try {
+                Platform.runLater(() -> {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Errore di salvataggio");
+                    alert.setHeaderText("Impossibile salvare i dati");
+                    alert.setContentText("Si è verificato un errore durante il salvataggio:\n" + e.getMessage());
+                    alert.showAndWait();
+                });
+            } catch (Exception ignored) { }
+        }
     }
 
     public void caricaDaFile() {
-        DatiApplicazione dati = GestoreFile.importa();
-        if (dati.getPlaylists() != null) {
-            for (Playlist p : dati.getPlaylists()) {
-                p.risolviRiferimenti(Catalogo.getInstance());
+        caricamentoInCorso = true;
+        try {
+            DatiApplicazione dati = GestoreFile.importa();
+            if (dati.getPlaylists() != null) {
+                for (Playlist p : dati.getPlaylists()) {
+                    p.risolviRiferimenti(Catalogo.getInstance());
+                }
+                playlists.addAll(dati.getPlaylists());
             }
-            playlists.addAll(dati.getPlaylists());
+        } finally {
+            caricamentoInCorso = false;
         }
     }
 
