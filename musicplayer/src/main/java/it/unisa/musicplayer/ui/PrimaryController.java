@@ -64,7 +64,7 @@ public class PrimaryController {
     @FXML
     private Button mainPlaylistPlayButton;
 
-    // Ora \u00E8 perfettamente mappato sull'id dell'FXML modificato
+    // Ora è perfettamente mappato sull'id dell'FXML modificato
     @FXML
     private Button btnEditTrack;
     @FXML
@@ -95,7 +95,7 @@ public class PrimaryController {
     private Label currentTrackLabel;
     @FXML
     private Label catalogTitleLabel;
-    // Controlli modalit\u00E0 della playlist - US-10
+    // Controlli modalità della playlist - US-10
     @FXML
     private HBox playlistModeControls;
     @FXML
@@ -222,7 +222,7 @@ if (btnSpostaGiu != null) { btnSpostaGiu.setVisible(false); btnSpostaGiu.setMana
                             contenitoreOrizzontale.getChildren().add(lblNew);
                         }
                         if (preferito) {
-                            Label lblStar = new Label("\u2605");
+                            Label lblStar = new Label("★");
                             lblStar.setStyle("-fx-text-fill: #1DB954; -fx-font-size: 13px;");
                             contenitoreOrizzontale.getChildren().add(lblStar);
                         }
@@ -318,7 +318,7 @@ if (btnSpostaGiu != null) { btnSpostaGiu.setVisible(false); btnSpostaGiu.setMana
             btnPlay.setOnAction(e -> {
                 if (lettore.getStato() == StatoLettore.PLAYING) {
                     lettore.pausa();
-                    btnPlay.setText("\u25B6");
+                    btnPlay.setText("▶");
                     timer.pause();
                 } else {
                     if (lettore.getTracciaCorrente() == null) {
@@ -367,7 +367,7 @@ if (btnSpostaGiu != null) { btnSpostaGiu.setVisible(false); btnSpostaGiu.setMana
                 /*
                  * Gestione di sicurezza del Loop:
                  * se il Lettore restituisce null alla fine della coda,
-                 * ricreiamo la coda mantenendo la modalit\u00E0 playlist.
+                 * ricreiamo la coda mantenendo la modalità playlist.
                  */
                 if (lettore.getTracciaCorrente() == null
                         && lettore.getModalita() instanceof Loop) {
@@ -386,13 +386,13 @@ if (btnSpostaGiu != null) { btnSpostaGiu.setVisible(false); btnSpostaGiu.setMana
 
                 /*
                  * Se non esiste una nuova traccia, la riproduzione
-                 * \u00E8 terminata, ad esempio in modalit\u00E0 Sequenziale.
+                 * è terminata, ad esempio in modalità Sequenziale.
                  */
                 if (lettore.getTracciaCorrente() == null) {
                     timer.pause();
 
                     if (btnPlay != null) {
-                        btnPlay.setText("\u25B6");
+                        btnPlay.setText("▶");
                     }
 
                     return;
@@ -511,7 +511,7 @@ if (btnSpostaGiu != null) { btnSpostaGiu.setVisible(false); btnSpostaGiu.setMana
                                             + Integer.parseInt(parti[1]);
 
                             /*
-                             * La traccia non \u00E8 ancora terminata:
+                             * La traccia non è ancora terminata:
                              * avanziamo il tempo di un secondo.
                              */
                             if (lettore.getTempoTrascorso() < durataTotale) {
@@ -522,7 +522,7 @@ if (btnSpostaGiu != null) { btnSpostaGiu.setVisible(false); btnSpostaGiu.setMana
                             /*
                              * Prima dello skip controlliamo se sta terminando
                              * naturalmente l'ultima traccia di una playlist
-                             * riprodotta in modalit\u00E0 Loop.
+                             * riprodotta in modalità Loop.
                              */
                             boolean nuovoGiroPlaylistLoop =
                                     staCompletandoCicloPlaylistLoop();
@@ -555,22 +555,22 @@ if (btnSpostaGiu != null) { btnSpostaGiu.setVisible(false); btnSpostaGiu.setMana
                             }
 
                             /*
-                             * Se non \u00E8 partita nessuna nuova traccia,
-                             * la riproduzione \u00E8 terminata.
+                             * Se non è partita nessuna nuova traccia,
+                             * la riproduzione è terminata.
                              */
                             if (lettore.getTracciaCorrente() == null) {
                                 timer.pause();
 
                                 if (btnPlay != null) {
-                                    btnPlay.setText("\u25B6");
+                                    btnPlay.setText("▶");
                                 }
 
                                 return;
                             }
 
                             /*
-                             * Se l'ultima traccia \u00E8 terminata naturalmente
-                             * e il Loop \u00E8 ripartito, la playlist riceve +1.
+                             * Se l'ultima traccia è terminata naturalmente
+                             * e il Loop è ripartito, la playlist riceve +1.
                              */
                             if (nuovoGiroPlaylistLoop
                                     && playlistInRiproduzione != null) {
@@ -639,7 +639,7 @@ CatalogoPlaylist.getInstance().getPlaylists().forEach(p ->
         });
 
 
-// Mostra copertina solo quando c'\u00E8 una traccia in riproduzione
+// Mostra copertina solo quando c'è una traccia in riproduzione
         if (copertina != null) {
             lettore.tracciaCorrenteProperty().addListener((obs, old, nuova) -> {
                 copertina.setVisible(nuova != null);
@@ -815,7 +815,7 @@ CatalogoPlaylist.getInstance().getPlaylists().forEach(p ->
                         Traccia nuovaTraccia = dialogController.getSongFromForm();
                         if (nuovaTraccia != null) {
                             eseguiOperazione(new AggiungiTracciaCatalogo(Catalogo.getInstance(), nuovaTraccia));
-                            // Se siamo in una playlist, aggiungi anche l\u00EC
+                            // Se siamo in una playlist, aggiungi anche lì
                             if (playlistCorrenteUi != null &&
                                     catalogTitleLabel.getText().startsWith("Playlist:")) {
                                 eseguiOperazione(new AggiungiTracciaPlaylist(playlistCorrenteUi, nuovaTraccia));
@@ -857,7 +857,7 @@ CatalogoPlaylist.getInstance().getPlaylists().forEach(p ->
                 // Disabilita modifica se siamo in una playlist
                 if (catalogTitleLabel != null && catalogTitleLabel.getText().startsWith("Playlist:")) {
                     Alert alert = new Alert(Alert.AlertType.WARNING,
-                            "Non \u00E8 possibile modificare una traccia dall'interno di una playlist. Vai al catalogo generale.");
+                            "Non è possibile modificare una traccia dall'interno di una playlist. Vai al catalogo generale.");
                     alert.setTitle("Operazione non consentita");
                     alert.setHeaderText(null);
                     mostraAlert(alert);
@@ -894,8 +894,8 @@ CatalogoPlaylist.getInstance().getPlaylists().forEach(p ->
                             // Eseguiamo l'aggiornamento nel modello Singleton
                             Catalogo.getInstance().modificaTraccia(tracciaSelezionata, tracciaModificata);
                             /*
-                             * Aggiorna le playlist automatiche gi\u00E0 esistenti.
-                             * Se una playlist non contiene pi\u00F9 tracce,
+                             * Aggiorna le playlist automatiche già esistenti.
+                             * Se una playlist non contiene più tracce,
                              * viene eliminata automaticamente.
                              */
                             sincronizzaPlaylistAutomatichePerTag();
@@ -1063,7 +1063,7 @@ if (btnRemoveTrack != null) {
 
     /**
      * Aggiorna le classifiche delle cinque tracce e playlist
-     * pi\u00F9 riprodotte durante la sessione corrente.
+     * più riprodotte durante la sessione corrente.
      */
     private void aggiornaStatistiche() {
         if (topTracksListView != null) {
@@ -1148,8 +1148,8 @@ if (btnRemoveTrack != null) {
 
 
     /**
-     * Verifica se la traccia corrente \u00E8 l'ultima della playlist
-     * in riproduzione e la modalit\u00E0 attiva \u00E8 Loop playlist.
+     * Verifica se la traccia corrente è l'ultima della playlist
+     * in riproduzione e la modalità attiva è Loop playlist.
      */
     private boolean staCompletandoCicloPlaylistLoop() {
         if (lettore == null
@@ -1200,7 +1200,7 @@ if (btnRemoveTrack != null) {
 
                     /*
                      * Non permettiamo di lasciare tutte
-                     * le modalit\u00E0 deselezionate.
+                     * le modalità deselezionate.
                      */
                     if (nuova == null) {
                         if (precedente != null) {
@@ -1212,7 +1212,7 @@ if (btnRemoveTrack != null) {
                     onCambiaModalita();
                 });
 
-        // Modalit\u00E0 iniziale
+        // Modalità iniziale
         btnPlaylistSequenziale.setSelected(true);
         onCambiaModalita();
     }
@@ -1241,12 +1241,12 @@ if (btnRemoveTrack != null) {
                     // Non fermare la riproduzione corrente
                     // Solo prepara la coda per il prossimo play
                     if (btnPlay != null) btnPlay.setText(
-                            lettore.getStato() == StatoLettore.PLAYING ? "||" : "\u25B6"
+                            lettore.getStato() == StatoLettore.PLAYING ? "||" : "▶"
                     );
                 }
             }
 
-            // Resetta i bottoni singoli quando si cambia modalit\u00E0 playlist
+            // Resetta i bottoni singoli quando si cambia modalità playlist
             if (trackShuffleButton != null) {
                 trackShuffleButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #B3B3B3; -fx-font-size: 15px; -fx-cursor: hand;");
             }
@@ -1349,7 +1349,7 @@ if (btnRemoveTrack != null) {
 
         if (numeroTracceAggiunte == 0) {
             conferma.setContentText(
-                    "Le tracce selezionate erano gi\u00E0 presenti nella playlist \"" +
+                    "Le tracce selezionate erano già presenti nella playlist \"" +
                             playlistScelta.getNome() + "\"."
             );
         } else if (numeroTracceAggiunte == 1) {
@@ -1573,8 +1573,8 @@ if (btnRemoveTrack != null) {
             mostraAlert(info);
         } catch (IllegalArgumentException ex) {
             Alert conferma = new Alert(Alert.AlertType.CONFIRMATION);
-            conferma.setTitle("Playlist gi\u00E0 esistente");
-            conferma.setHeaderText("Esiste gi\u00E0 \"" + playlist.getNome() + "\"");
+            conferma.setTitle("Playlist già esistente");
+            conferma.setHeaderText("Esiste già \"" + playlist.getNome() + "\"");
             conferma.setContentText("Vuoi sovrascriverla con i dati aggiornati?");
             Optional<ButtonType> r = mostraDialog(conferma);
             if (r.isPresent() && r.get() == ButtonType.OK) {
@@ -1585,7 +1585,7 @@ if (btnRemoveTrack != null) {
     }
 
     /**
-     * Aggiorna le playlist automatiche gi\u00E0 esistenti
+     * Aggiorna le playlist automatiche già esistenti
      * in seguito alla modifica dei tag di una traccia.
      */
     private void sincronizzaPlaylistAutomatichePerTag() {
