@@ -18,7 +18,7 @@
          <children>
             <VBox spacing="4.0">
                <children>
-                  <Label styleClass="dialog-title" text="Aggiungi o modifica brano" />
+                   <Label styleClass="dialog-title" text="Aggiungi brano" />
                   <Label styleClass="small-label" text="Compila i dettagli della traccia e scegli eventuali tag visivi." />
                </children>
             </VBox>
