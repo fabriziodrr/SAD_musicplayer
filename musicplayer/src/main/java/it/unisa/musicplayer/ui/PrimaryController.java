@@ -222,7 +222,7 @@ if (btnSpostaGiu != null) { btnSpostaGiu.setVisible(false); btnSpostaGiu.setMana
                             contenitoreOrizzontale.getChildren().add(lblNew);
                         }
                         if (preferito) {
-                            Label lblStar = new Label("���");
+                            Label lblStar = new Label("\u2605");
                             lblStar.setStyle("-fx-text-fill: #1DB954; -fx-font-size: 13px;");
                             contenitoreOrizzontale.getChildren().add(lblStar);
                         }
