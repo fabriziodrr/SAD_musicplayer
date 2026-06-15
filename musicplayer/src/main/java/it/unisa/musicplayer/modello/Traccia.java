@@ -2,6 +2,7 @@ package it.unisa.musicplayer.modello;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Set;
@@ -15,7 +16,7 @@ public class Traccia {
     private String genere;
     private int    anno;
     private final Set<Tag> tag;
-    private int contaRiproduzioni;
+    @JsonIgnore private int contaRiproduzioni;
 
     @JsonCreator
     public Traccia(@JsonProperty("id") String id,
@@ -42,7 +43,7 @@ public class Traccia {
         this.contaRiproduzioni = 0;
     }
 
-    // ── Getter ────────────────────────────────────────────────────────────────
+    //Getter
 
     public String getId()     { return id; }
     public String getTitolo() { return titolo; }
@@ -50,7 +51,7 @@ public class Traccia {
     public String getDurata() { return durata; }
     public String getGenere() { return genere; }
     public int    getAnno()   { return anno; }
-    public int    getContaRiproduzioni() { return contaRiproduzioni; }
+    @JsonIgnore public int    getContaRiproduzioni() { return contaRiproduzioni; }
 
     
     //Restituisce una copia difensiva del set di tag per evitare modifiche esterne non controllate.
