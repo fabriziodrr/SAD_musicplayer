@@ -344,69 +344,116 @@ public class PrimaryController {
             });
         }
 
-// Bottone Skip
-      /*  if (btnSkip != null) {
+
+
+        // Bottone Skip
+        if (btnSkip != null) {
             btnSkip.setOnAction(e -> {
                 if (lettore.getTracciaCorrente() == null) {
                     return;
                 }
 
+                /*
+                 * Lo Skip manuale non incrementa la playlist.
+                 * Incrementeremo soltanto la nuova traccia raggiunta.
+                 */
                 lettore.skip();
 
+                /*
+                 * Gestione di sicurezza del Loop:
+                 * se il Lettore restituisce null alla fine della coda,
+                 * ricreiamo la coda mantenendo la modalità playlist.
+                 */
+                if (lettore.getTracciaCorrente() == null
+                        && lettore.getModalita() instanceof Loop) {
+
+                    List<Traccia> coda =
+                            creaCodaRiproduzioneCorrente();
+
+                    if (!coda.isEmpty()) {
+                        lettore.aggiornaCodeTracce(coda);
+                        lettore.setModalita(
+                                modalitaPlaylistSelezionata
+                        );
+                        lettore.play();
+                    }
+                }
+
+                /*
+                 * Se non esiste una nuova traccia, la riproduzione
+                 * è terminata, ad esempio in modalità Sequenziale.
+                 */
                 if (lettore.getTracciaCorrente() == null) {
                     timer.pause();
 
                     if (btnPlay != null) {
                         btnPlay.setText("▶");
                     }
-                } else {
-                    timer.play();
 
-                    if (btnPlay != null) {
-                        btnPlay.setText("||");
-                    }
-                }
-            });
-        }*/
-
-        if (btnSkip != null) {
-            btnSkip.setOnAction(e -> {
-                if (lettore.getTracciaCorrente() == null) return;
-
-                lettore.skip();
-
-                if (lettore.getTracciaCorrente() == null) {
-                    List<Traccia> coda = creaCodaRiproduzioneCorrente();
-                    lettore.aggiornaCodeTracce(coda);
-                    lettore.setModalita(new SequenzialeSingola());
-                    lettore.play();
-                    timer.play();
-                    if (btnPlay != null) btnPlay.setText("||");
-                } else {
-                    timer.play();
-                    if (btnPlay != null) btnPlay.setText("||");
+                    return;
                 }
 
+                timer.play();
+
+                if (btnPlay != null) {
+                    btnPlay.setText("||");
+                }
+
+                /*
+                 * La nuova traccia raggiunta con Skip riceve +1.
+                 * La playlist non riceve incrementi.
+                 */
                 registraRiproduzioneTracciaCorrente();
-
             });
         }
 
 // Bottone Precedente
         if (btnPrecedente != null) {
             btnPrecedente.setOnAction(e -> {
-                if (lettore.getTracciaCorrente() == null) return;
-                List<Traccia> tracce = creaCodaRiproduzioneCorrente();
-                int indice = tracce.indexOf(lettore.getTracciaCorrente());
-                if (indice > 0) {
-                    List<Traccia> nuovaCoda = tracce.subList(indice - 1, tracce.size());
-                    lettore.aggiornaCodeTracce(new ArrayList<>(nuovaCoda));
-                    lettore.setModalita(new SequenzialeSingola());
-                    lettore.play();
-                    registraRiproduzioneTracciaCorrente();
+                if (lettore.getTracciaCorrente() == null) {
+                    return;
                 }
-                timer.play();
-                btnPlay.setText("||");
+
+                List<Traccia> tracce =
+                        creaCodaRiproduzioneCorrente();
+
+                int indice =
+                        tracce.indexOf(
+                                lettore.getTracciaCorrente()
+                        );
+
+                if (indice > 0) {
+                    List<Traccia> nuovaCoda =
+                            tracce.subList(
+                                    indice - 1,
+                                    tracce.size()
+                            );
+
+                    lettore.aggiornaCodeTracce(
+                            new ArrayList<>(nuovaCoda)
+                    );
+
+                    if (playlistInRiproduzione != null) {
+                        lettore.setModalita(
+                                modalitaPlaylistSelezionata
+                        );
+                    } else {
+                        lettore.setModalita(
+                                new SequenzialeSingola()
+                        );
+                    }
+
+                    lettore.play();
+
+                    // La traccia precedente appena avviata riceve +1
+                    registraRiproduzioneTracciaCorrente();
+
+                    timer.play();
+
+                    if (btnPlay != null) {
+                        btnPlay.setText("||");
+                    }
+                }
             });
         }
 
@@ -438,93 +485,110 @@ public class PrimaryController {
             });
         }
 
-// Timer
-       /* timer = new javafx.animation.Timeline(
-                new javafx.animation.KeyFrame(
-                        javafx.util.Duration.seconds(1),
-                        e -> {
-                            Traccia t = lettore.getTracciaCorrente();
-                            if (t != null) {
-                                String[] parti = t.getDurata().split(":");
-                                int durataTotale = Integer.parseInt(parti[0]) * 60 + Integer.parseInt(parti[1]);
-                                if (lettore.getTempoTrascorso() >= durataTotale) {
-                                    lettore.skip();
-                                    if (lettore.getTracciaCorrente() == null) {
-                                          // Se modalità sequenziale → si ferma
-                                     if ("SEQUENZIALE".equals(lettore.getModalita().getNome())) {
-                                     timer.pause();
-                                     btnPlay.setText("▶");
-                                     lettore.avanzaTempo(1); 
-                                    } else {
-                                        // Usa la playlist corrente se disponibile, altrimenti il catalogo
-                                        List<Traccia> coda = playlistCorrenteUi != null 
-                                            ? new ArrayList<>(playlistCorrenteUi.getTracce())
-                                            : new ArrayList<>(Catalogo.getInstance().getTracce());
-                                        lettore.aggiornaCodeTracce(coda);
-                                        lettore.play();
-                                        timer.play();
-                                        btnPlay.setText("||");
-                                    }                                   
-                                } else {
-                                    lettore.avanzaTempo(1); 
-                                }
-                            }
-                            }
-                        }
-                )
-        );
-        timer.setCycleCount(javafx.animation.Animation.INDEFINITE);*/
 
+        // Timer: gestisce la fine naturale delle tracce
         timer = new javafx.animation.Timeline(
                 new javafx.animation.KeyFrame(
                         javafx.util.Duration.seconds(1),
                         e -> {
-                            Traccia t = lettore.getTracciaCorrente();
-                            if (t != null) {
-                                String[] parti = t.getDurata().split(":");
-                                int durataTotale = Integer.parseInt(parti[0]) * 60 + Integer.parseInt(parti[1]);
-                                if (lettore.getTempoTrascorso() >= durataTotale) {
+                            Traccia tracciaCorrente =
+                                    lettore.getTracciaCorrente();
 
-                                    /*
-                                     * Il controllo viene fatto prima dello skip,
-                                     * quando la traccia corrente è ancora l'ultima.
-                                     */
-                                    boolean cicloPlaylistLoopCompletato =
-                                            staCompletandoCicloPlaylistLoop();
+                            if (tracciaCorrente == null) {
+                                return;
+                            }
 
-                                    lettore.skip();
-                                    if (lettore.getTracciaCorrente() == null) {
-                                        // Se modalità sequenziale → si ferma
-                                        if ("SEQUENZIALE".equals(lettore.getModalita().getNome())) {
-                                            timer.pause();
-                                            btnPlay.setText("▶");
-                                        } else {
-                                            // Altrimenti riparte dall'inizio
-                                            List<Traccia> coda = creaCodaRiproduzioneCorrente();
-                                            lettore.aggiornaCodeTracce(coda);
-                                            lettore.play();
-                                            timer.play();
-                                            btnPlay.setText("||");
-                                        }
-                                    } else {
-                                        btnPlay.setText("||");
-                                    }
+                            String[] parti =
+                                    tracciaCorrente.getDurata().split(":");
 
-                                    if (cicloPlaylistLoopCompletato
-                                            && playlistInRiproduzione != null
-                                            && lettore.getTracciaCorrente() != null) {
+                            int durataTotale =
+                                    Integer.parseInt(parti[0]) * 60
+                                            + Integer.parseInt(parti[1]);
 
-                                        playlistInRiproduzione.incrementaRiproduzioni();
-                                    }
-                                    registraRiproduzioneTracciaCorrente();
-                                } else {
-                                    lettore.avanzaTempo(1);
+                            /*
+                             * La traccia non è ancora terminata:
+                             * avanziamo il tempo di un secondo.
+                             */
+                            if (lettore.getTempoTrascorso() < durataTotale) {
+                                lettore.avanzaTempo(1);
+                                return;
+                            }
+
+                            /*
+                             * Prima dello skip controlliamo se sta terminando
+                             * naturalmente l'ultima traccia di una playlist
+                             * riprodotta in modalità Loop.
+                             */
+                            boolean nuovoGiroPlaylistLoop =
+                                    staCompletandoCicloPlaylistLoop();
+
+                            /*
+                             * Passaggio automatico alla traccia successiva.
+                             */
+                            lettore.skip();
+
+                            /*
+                             * Gestione di sicurezza:
+                             * se Loop ha restituito null alla fine della coda,
+                             * ricreiamo la coda e ripartiamo dalla prima traccia.
+                             */
+                            if (lettore.getTracciaCorrente() == null
+                                    && lettore.getModalita() instanceof Loop) {
+
+                                List<Traccia> coda =
+                                        creaCodaRiproduzioneCorrente();
+
+                                if (!coda.isEmpty()) {
+                                    lettore.aggiornaCodeTracce(coda);
+
+                                    lettore.setModalita(
+                                            modalitaPlaylistSelezionata
+                                    );
+
+                                    lettore.play();
                                 }
+                            }
+
+                            /*
+                             * Se non è partita nessuna nuova traccia,
+                             * la riproduzione è terminata.
+                             */
+                            if (lettore.getTracciaCorrente() == null) {
+                                timer.pause();
+
+                                if (btnPlay != null) {
+                                    btnPlay.setText("▶");
+                                }
+
+                                return;
+                            }
+
+                            /*
+                             * Se l'ultima traccia è terminata naturalmente
+                             * e il Loop è ripartito, la playlist riceve +1.
+                             */
+                            if (nuovoGiroPlaylistLoop
+                                    && playlistInRiproduzione != null) {
+
+                                playlistInRiproduzione
+                                        .incrementaRiproduzioni();
+                            }
+
+                            /*
+                             * La nuova traccia appena partita riceve +1.
+                             */
+                            registraRiproduzioneTracciaCorrente();
+
+                            if (btnPlay != null) {
+                                btnPlay.setText("||");
                             }
                         }
                 )
         );
-        timer.setCycleCount(javafx.animation.Animation.INDEFINITE);
+
+        timer.setCycleCount(
+                javafx.animation.Animation.INDEFINITE
+        );
 
         // Aggiorna la coda automaticamente quando il catalogo cambia
         Catalogo.getInstance().getTracce().addListener(
@@ -792,6 +856,12 @@ public class PrimaryController {
                         if (tracciaModificata != null) {
                             // Eseguiamo l'aggiornamento nel modello Singleton
                             Catalogo.getInstance().modificaTraccia(tracciaSelezionata, tracciaModificata);
+                            /*
+                             * Aggiorna le playlist automatiche già esistenti.
+                             * Se una playlist non contiene più tracce,
+                             * viene eliminata automaticamente.
+                             */
+                            sincronizzaPlaylistAutomatichePerTag();
                             songTableView.getSelectionModel().clearSelection();
                             // L'uso della ObservableList aggiorna istantaneamente la tabella a schermo!
                         }
@@ -965,8 +1035,7 @@ public class PrimaryController {
             return;
         }
 
-        Traccia tracciaCorrente =
-                lettore.getTracciaCorrente();
+        Traccia tracciaCorrente = lettore.getTracciaCorrente();
 
         if (tracciaCorrente == null) {
             return;
@@ -1198,48 +1267,201 @@ public class PrimaryController {
     }
 
     private void onGeneraPlaylistAutomatica() {
-        ChoiceDialog<String> criterioDialog = new ChoiceDialog<>("Per Genere", Arrays.asList("Per Genere", "Per Anno"));
-        criterioDialog.setTitle("Genera Playlist Automatica");
-        criterioDialog.setHeaderText("Scegli il criterio di generazione");
+        ChoiceDialog<String> criterioDialog =
+                new ChoiceDialog<>(
+                        "Per Genere",
+                        Arrays.asList(
+                                "Per Genere",
+                                "Per Anno",
+                                "Per Tag"
+                        )
+                );
+
+        criterioDialog.setTitle(
+                "Genera Playlist Automatica"
+        );
+        criterioDialog.setHeaderText(
+                "Scegli il criterio di generazione"
+        );
         criterioDialog.setContentText("Filtra per:");
 
-        Optional<String> criterio = mostraDialog(criterioDialog);
-        if (!criterio.isPresent()) return;
+        Optional<String> criterio =
+                mostraDialog(criterioDialog);
+
+        if (criterio.isEmpty()) {
+            return;
+        }
 
         Catalogo catalogo = Catalogo.getInstance();
-        GeneratorePlaylistAutomatica generatore = new GeneratorePlaylistAutomatica();
 
-        if ("Per Genere".equals(criterio.get())) {
-            List<String> generi = catalogo.getTracce().stream()
-                    .map(Traccia::getGenere).distinct().sorted().collect(Collectors.toList());
-            if (generi.isEmpty()) {
-                mostraAlert(new Alert(Alert.AlertType.WARNING, "Nessuna traccia nel catalogo."));
-                return;
-            }
-            ChoiceDialog<String> genereDialog = new ChoiceDialog<>(generi.get(0), generi);
-            genereDialog.setTitle("Genera per Genere");
-            genereDialog.setHeaderText("Seleziona il genere");
-            genereDialog.setContentText("Genere:");
-            Optional<String> genere = mostraDialog(genereDialog);
-            if (!genere.isPresent()) return;
-            aggiungiPlaylistGenerata(generatore.generaPerGenere(catalogo, genere.get()));
+        GeneratorePlaylistAutomatica generatore =
+                new GeneratorePlaylistAutomatica();
 
-        } else {
-            List<Integer> anni = catalogo.getTracce().stream()
-                    .map(Traccia::getAnno).distinct().sorted().collect(Collectors.toList());
-            if (anni.isEmpty()) {
-                mostraAlert(new Alert(Alert.AlertType.WARNING, "Nessuna traccia nel catalogo."));
-                return;
+        switch (criterio.get()) {
+
+            case "Per Genere" -> {
+                List<String> generi =
+                        catalogo.getTracce()
+                                .stream()
+                                .map(Traccia::getGenere)
+                                .distinct()
+                                .sorted()
+                                .collect(Collectors.toList());
+
+                if (generi.isEmpty()) {
+                    mostraAlert(
+                            new Alert(
+                                    Alert.AlertType.WARNING,
+                                    "Nessuna traccia presente nel catalogo."
+                            )
+                    );
+                    return;
+                }
+
+                ChoiceDialog<String> genereDialog =
+                        new ChoiceDialog<>(
+                                generi.get(0),
+                                generi
+                        );
+
+                genereDialog.setTitle("Genera per Genere");
+                genereDialog.setHeaderText(
+                        "Seleziona il genere"
+                );
+                genereDialog.setContentText("Genere:");
+
+                Optional<String> genere =
+                        mostraDialog(genereDialog);
+
+                if (genere.isEmpty()) {
+                    return;
+                }
+
+                aggiungiPlaylistGenerata(
+                        generatore.generaPerGenere(
+                                catalogo,
+                                genere.get()
+                        )
+                );
             }
-            ChoiceDialog<Integer> annoDialog = new ChoiceDialog<>(anni.get(0), anni);
-            annoDialog.setTitle("Genera per Anno");
-            annoDialog.setHeaderText("Seleziona l'anno");
-            annoDialog.setContentText("Anno:");
-            Optional<Integer> anno = mostraDialog(annoDialog);
-            if (!anno.isPresent()) return;
-            aggiungiPlaylistGenerata(generatore.generaPerAnno(catalogo, anno.get()));
+
+
+            case "Per Anno" -> {
+                List<Integer> anni =
+                        catalogo.getTracce()
+                                .stream()
+                                .map(Traccia::getAnno)
+                                .distinct()
+                                .sorted()
+                                .collect(Collectors.toList());
+
+                if (anni.isEmpty()) {
+                    mostraAlert(
+                            new Alert(
+                                    Alert.AlertType.WARNING,
+                                    "Nessuna traccia presente nel catalogo."
+                            )
+                    );
+                    return;
+                }
+
+                ChoiceDialog<Integer> annoDialog =
+                        new ChoiceDialog<>(
+                                anni.get(0),
+                                anni
+                        );
+
+                annoDialog.setTitle("Genera per Anno");
+                annoDialog.setHeaderText(
+                        "Seleziona l'anno"
+                );
+                annoDialog.setContentText("Anno:");
+
+                Optional<Integer> anno =
+                        mostraDialog(annoDialog);
+
+                if (anno.isEmpty()) {
+                    return;
+                }
+
+                aggiungiPlaylistGenerata(
+                        generatore.generaPerAnno(
+                                catalogo,
+                                anno.get()
+                        )
+                );
+            }
+
+            case "Per Tag" -> {
+                List<String> nomiTag = Arrays.asList(
+                        "Preferito",
+                        "Esplicito",
+                        "Nuova Uscita"
+                );
+
+                ChoiceDialog<String> tagDialog =
+                        new ChoiceDialog<>(
+                                nomiTag.get(0),
+                                nomiTag
+                        );
+
+                tagDialog.setTitle("Genera per Tag");
+                tagDialog.setHeaderText(
+                        "Seleziona il tag visivo"
+                );
+                tagDialog.setContentText("Tag:");
+
+                Optional<String> tagScelto =
+                        mostraDialog(tagDialog);
+
+                if (tagScelto.isEmpty()) {
+                    return;
+                }
+
+                Tag tag = switch (tagScelto.get()) {
+                    case "Preferito" -> Tag.FAVOURITE;
+                    case "Esplicito" -> Tag.EXPLICIT;
+                    case "Nuova Uscita" -> Tag.NEW_RELEASE;
+
+                    default -> throw new IllegalStateException(
+                            "Tag non riconosciuto: "
+                                    + tagScelto.get()
+                    );
+                };
+
+                Playlist playlistGenerata =
+                        generatore.generaPerTag(
+                                catalogo,
+                                tag
+                        );
+
+                if (playlistGenerata.getNumeroTracce() == 0) {
+                    Alert alert = new Alert(
+                            Alert.AlertType.WARNING,
+                            "Non esistono tracce con il tag selezionato."
+                    );
+
+                    alert.setTitle(
+                            "Nessuna traccia corrispondente"
+                    );
+                    alert.setHeaderText(null);
+
+                    mostraAlert(alert);
+                    return;
+                }
+
+                aggiungiPlaylistGenerata(
+                        playlistGenerata
+                );
+            }
+
+            default -> throw new IllegalStateException(
+                    "Criterio non riconosciuto: "
+                            + criterio.get()
+            );
         }
     }
+
 
     private void aggiungiPlaylistGenerata(Playlist playlist) {
         try {
@@ -1258,6 +1480,33 @@ public class PrimaryController {
                 CatalogoPlaylist.getInstance().rimuoviPlaylist(playlist.getNome());
                 CatalogoPlaylist.getInstance().aggiungiPlaylist(playlist);
             }
+        }
+    }
+
+    /**
+     * Aggiorna le playlist automatiche già esistenti
+     * in seguito alla modifica dei tag di una traccia.
+     */
+    private void sincronizzaPlaylistAutomatichePerTag() {
+        GeneratorePlaylistAutomatica generatore =
+                new GeneratorePlaylistAutomatica();
+
+        int numeroPlaylistModificate =
+                generatore.sincronizzaPlaylistAutomatichePerTag(
+                        Catalogo.getInstance(),
+                        CatalogoPlaylist.getInstance()
+                );
+
+        if (numeroPlaylistModificate == 0) {
+            return;
+        }
+
+        if (sidebarListView != null) {
+            sidebarListView.refresh();
+        }
+
+        if (songTableView != null) {
+            songTableView.refresh();
         }
     }
 
