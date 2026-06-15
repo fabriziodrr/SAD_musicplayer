@@ -164,11 +164,10 @@ public class PrimaryController {
             songTableView.setItems(Catalogo.getInstance().getTracce());
             songTableView.setPlaceholder(new Label("Nessuna traccia presente"));
             songTableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        }
-
         // All'avvio nascondi i bottoni di riordino
 if (btnSpostaSu != null) { btnSpostaSu.setVisible(false); btnSpostaSu.setManaged(false); }
 if (btnSpostaGiu != null) { btnSpostaGiu.setVisible(false); btnSpostaGiu.setManaged(false); }
+        }
 
         // 2. CONFIGURAZIONE DELLE COLONNE CON I GETTER DELLA CLASSE TRACCIA
         titleColumn.setCellValueFactory(new PropertyValueFactory<>("titolo"));
@@ -612,7 +611,7 @@ if (btnSpostaGiu != null) { btnSpostaGiu.setVisible(false); btnSpostaGiu.setMana
                 }
         );
 
-        //RIORDINO PLAYLIST TASK 19.4
+//RIORDINO PLAYLIST TASK 19.4
 CatalogoPlaylist.getInstance().getPlaylists().forEach(p -> 
     p.getTracce().addListener((javafx.collections.ListChangeListener<Traccia>) change -> {
         if (playlistInRiproduzione != null && 
@@ -966,14 +965,14 @@ if (btnRemoveTrack != null) {
         boolean siamoInPlaylist = playlistSelezionata != null &&
                                   catalogTitleLabel.getText().startsWith("Playlist:");
 
-        // CASO 1: siamo in una playlist e abbiamo selezionato una traccia -> rimuovi traccia dalla playlist
+        // CASO 1: siamo in una playlist e abbiamo selezionato una traccia → rimuovi traccia dalla playlist
         if (siamoInPlaylist && tracciaSelezionata != null) {
             Alert conferma = new Alert(Alert.AlertType.CONFIRMATION);
             conferma.setTitle("Conferma rimozione");
             conferma.setHeaderText("Rimuovere dalla playlist?");
             conferma.setContentText("La traccia \"" + tracciaSelezionata.getTitolo() +
-                "\" verr+� rimossa dalla playlist \"" + playlistSelezionata.getNome() +
-                "\" ma rimarr+� nel catalogo generale.");
+                "\" verrà rimossa dalla playlist \"" + playlistSelezionata.getNome() +
+                "\" ma rimarrà nel catalogo generale.");
 
             java.util.Optional<ButtonType> scelta = mostraDialog(conferma);
             if (scelta.isPresent() && scelta.get() == ButtonType.OK) {
@@ -987,13 +986,13 @@ if (btnRemoveTrack != null) {
                 songTableView.getSelectionModel().clearSelection();
             }
 
-        // CASO 2: siamo in una playlist ma nessuna traccia selezionata -> elimina la playlist
+        // CASO 2: siamo in una playlist ma nessuna traccia selezionata → elimina la playlist
         } else if (siamoInPlaylist && tracciaSelezionata == null) {
             Alert conferma = new Alert(Alert.AlertType.CONFIRMATION);
             conferma.setTitle("Elimina playlist");
             conferma.setHeaderText("Eliminare la playlist?");
             conferma.setContentText("La playlist \"" + playlistSelezionata.getNome() +
-                "\" verr+� eliminata. Le tracce rimarranno nel catalogo generale.");
+                "\" verrà eliminata. Le tracce rimarranno nel catalogo generale.");
 
             java.util.Optional<ButtonType> scelta = mostraDialog(conferma);
             if (scelta.isPresent() && scelta.get() == ButtonType.OK) {
@@ -1001,7 +1000,7 @@ if (btnRemoveTrack != null) {
                     lettore.stop();
                     playlistInRiproduzione = null;
                     timer.pause();
-                    if (btnPlay != null) btnPlay.setText("+��");
+                    if (btnPlay != null) btnPlay.setText("▶");
                 }
                 CatalogoPlaylist.getInstance().rimuoviPlaylist(playlistSelezionata.getNome());
                 CatalogoPlaylist.getInstance().eseguiSalvataggioAutomatico();
@@ -1013,18 +1012,18 @@ if (btnRemoveTrack != null) {
                     btnEditTrack.setVisible(true);
                     btnEditTrack.setManaged(true);
                 }
-                if (btnRemoveTrack != null) btnRemoveTrack.setText("+�� Rimuovi");
+                if (btnRemoveTrack != null) btnRemoveTrack.setText("✕ Rimuovi");
                 if (btnSpostaSu != null) { btnSpostaSu.setVisible(false); btnSpostaSu.setManaged(false); }
                 if (btnSpostaGiu != null) { btnSpostaGiu.setVisible(false); btnSpostaGiu.setManaged(false); }
             }
 
-        // CASO 3: siamo nel catalogo generale con una traccia selezionata -> rimuovi dal catalogo
+        // CASO 3: siamo nel catalogo generale con una traccia selezionata → rimuovi dal catalogo
         } else if (!siamoInPlaylist && tracciaSelezionata != null) {
             Alert conferma = new Alert(Alert.AlertType.CONFIRMATION);
             conferma.setTitle("Conferma eliminazione");
             conferma.setHeaderText("Eliminare definitivamente la traccia?");
             conferma.setContentText("La traccia \"" + tracciaSelezionata.getTitolo() +
-                "\" verr+� rimossa dal catalogo e da tutte le playlist in cui +� presente.");
+                "\" verrà rimossa dal catalogo e da tutte le playlist in cui è presente.");
 
             java.util.Optional<ButtonType> scelta = mostraDialog(conferma);
             if (scelta.isPresent() && scelta.get() == ButtonType.OK) {
@@ -1050,7 +1049,7 @@ if (btnRemoveTrack != null) {
                 songTableView.getSelectionModel().clearSelection();
             }
 
-        // CASO 4: catalogo generale, nessuna traccia selezionata -> avviso
+        // CASO 4: catalogo generale, nessuna traccia selezionata → avviso
         } else {
             Alert alert = new Alert(Alert.AlertType.WARNING, "Seleziona prima una traccia o una playlist dalla tabella.");
             alert.setTitle("Nessuna traccia selezionata");
