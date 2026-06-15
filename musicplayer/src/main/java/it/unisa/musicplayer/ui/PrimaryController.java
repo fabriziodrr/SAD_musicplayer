@@ -484,6 +484,14 @@ public class PrimaryController {
                                 String[] parti = t.getDurata().split(":");
                                 int durataTotale = Integer.parseInt(parti[0]) * 60 + Integer.parseInt(parti[1]);
                                 if (lettore.getTempoTrascorso() >= durataTotale) {
+
+                                    /*
+                                     * Il controllo viene fatto prima dello skip,
+                                     * quando la traccia corrente è ancora l'ultima.
+                                     */
+                                    boolean cicloPlaylistLoopCompletato =
+                                            staCompletandoCicloPlaylistLoop();
+
                                     lettore.skip();
                                     if (lettore.getTracciaCorrente() == null) {
                                         // Se modalità sequenziale → si ferma
@@ -500,6 +508,13 @@ public class PrimaryController {
                                         }
                                     } else {
                                         btnPlay.setText("||");
+                                    }
+
+                                    if (cicloPlaylistLoopCompletato
+                                            && playlistInRiproduzione != null
+                                            && lettore.getTracciaCorrente() != null) {
+
+                                        playlistInRiproduzione.incrementaRiproduzioni();
                                     }
                                     registraRiproduzioneTracciaCorrente();
                                 } else {
@@ -961,6 +976,34 @@ public class PrimaryController {
         aggiornaStatistiche();
     }
 
+
+    /**
+     * Verifica se la traccia corrente è l'ultima della playlist
+     * in riproduzione e la modalità attiva è Loop playlist.
+     */
+    private boolean staCompletandoCicloPlaylistLoop() {
+        if (lettore == null
+                || playlistInRiproduzione == null
+                || !(lettore.getModalita() instanceof Loop)) {
+            return false;
+        }
+
+        List<Traccia> tracce =
+                playlistInRiproduzione.getTracce();
+
+        if (tracce.isEmpty()) {
+            return false;
+        }
+
+        Traccia tracciaCorrente =
+                lettore.getTracciaCorrente();
+
+        Traccia ultimaTraccia =
+                tracce.get(tracce.size() - 1);
+
+        return tracciaCorrente != null
+                && tracciaCorrente.equals(ultimaTraccia);
+    }
 
     private void configuraControlliModalitaPlaylist() {
         if (btnPlaylistSequenziale == null
