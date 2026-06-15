@@ -154,4 +154,31 @@ class PlaylistTest {
         assertThrows(NullPointerException.class, () -> playlist.aggiungiTraccia(null));
     }
 
+    @Test
+    void testContatoreRiproduzioniInizialmenteZero() {
+        Playlist playlist = new Playlist("Playlist Test");
+
+        assertEquals(0, playlist.getContaRiproduzioni());
+    }
+
+    @Test
+    void testIncrementaRiproduzioniPlaylist() {
+        Playlist playlist = new Playlist("Playlist Test");
+
+        playlist.incrementaRiproduzioni();
+
+        assertEquals(1, playlist.getContaRiproduzioni());
+    }
+
+    @Test
+    void testIncrementaRiproduzioniPlaylistPiuVolte() {
+        Playlist playlist = new Playlist("Playlist Test");
+
+        playlist.incrementaRiproduzioni();
+        playlist.incrementaRiproduzioni();
+        playlist.incrementaRiproduzioni();
+
+        assertEquals(3, playlist.getContaRiproduzioni());
+    }
+
 }

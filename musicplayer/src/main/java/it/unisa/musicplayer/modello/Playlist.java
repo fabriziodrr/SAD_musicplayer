@@ -22,14 +22,25 @@ public class Playlist {
 
     private List<String> idTracce;
 
+    /*
+     * Contatore valido soltanto durante la sessione corrente.
+     * Non viene salvato nel file JSON.
+     */
+    @JsonIgnore
+    private int contaRiproduzioni;
+
     @JsonCreator
     public Playlist(@JsonProperty("nome") String nome) {
         if (nome == null || nome.trim().isEmpty()) {
-            throw new IllegalArgumentException("Il nome della playlist non può essere vuoto");
+            throw new IllegalArgumentException(
+                    "Il nome della playlist non può essere vuoto"
+            );
         }
+
         this.nome = nome.trim();
         this.tracce = FXCollections.observableArrayList();
         this.idTracce = new ArrayList<>();
+        this.contaRiproduzioni = 0;
     }
 
     public String getNome() {
@@ -38,8 +49,11 @@ public class Playlist {
 
     public void setNome(String nome) {
         if (nome == null || nome.trim().isEmpty()) {
-            throw new IllegalArgumentException("Il nome della playlist non può essere vuoto");
+            throw new IllegalArgumentException(
+                    "Il nome della playlist non può essere vuoto"
+            );
         }
+
         this.nome = nome.trim();
     }
 
@@ -53,11 +67,35 @@ public class Playlist {
     }
 
     public void setIdTracce(List<String> idTracce) {
-        this.idTracce = idTracce != null ? idTracce : new ArrayList<>();
+        this.idTracce = idTracce != null
+                ? idTracce
+                : new ArrayList<>();
+    }
+
+    /**
+     * Restituisce il numero di volte in cui la playlist
+     * è stata avviata durante la sessione corrente.
+     *
+     * @return numero di riproduzioni della playlist
+     */
+    @JsonIgnore
+    public int getContaRiproduzioni() {
+        return contaRiproduzioni;
+    }
+
+    /**
+     * Incrementa il numero di riproduzioni della playlist.
+     */
+    public void incrementaRiproduzioni() {
+        contaRiproduzioni++;
     }
 
     public void aggiungiTraccia(Traccia t) {
-        Objects.requireNonNull(t, "La traccia non può essere null");
+        Objects.requireNonNull(
+                t,
+                "La traccia non può essere null"
+        );
+
         if (!idTracce.contains(t.getId())) {
             idTracce.add(t.getId());
             tracce.add(t);
@@ -65,27 +103,44 @@ public class Playlist {
     }
 
     public void inserisciTraccia(Traccia t, int indice) {
-        Objects.requireNonNull(t, "La traccia non può essere null");
+        Objects.requireNonNull(
+                t,
+                "La traccia non può essere null"
+        );
+
         if (idTracce.contains(t.getId())) {
             return;
         }
 
-        // L'indice viene normalizzato per ripristinare la posizione più vicina possibile.
-        int indiceSicuro = Math.max(0, Math.min(indice, tracce.size()));
+        /*
+         * L'indice viene normalizzato per ripristinare
+         * la posizione più vicina possibile.
+         */
+        int indiceSicuro = Math.max(
+                0,
+                Math.min(indice, tracce.size())
+        );
+
         idTracce.add(indiceSicuro, t.getId());
         tracce.add(indiceSicuro, t);
     }
 
     public void rimuoviTraccia(Traccia t) {
-        Objects.requireNonNull(t, "La traccia non può essere null");
+        Objects.requireNonNull(
+                t,
+                "La traccia non può essere null"
+        );
+
         idTracce.remove(t.getId());
         tracce.remove(t);
     }
 
     public void risolviRiferimenti(Catalogo catalogo) {
         tracce.clear();
+
         for (String id : idTracce) {
-            catalogo.cercaPerId(id).ifPresent(tracce::add);
+            catalogo.cercaPerId(id)
+                    .ifPresent(tracce::add);
         }
     }
 
@@ -112,8 +167,14 @@ public class Playlist {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof Playlist)) return false;
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof Playlist)) {
+            return false;
+        }
+
         Playlist altra = (Playlist) obj;
         return nome.equalsIgnoreCase(altra.nome);
     }
