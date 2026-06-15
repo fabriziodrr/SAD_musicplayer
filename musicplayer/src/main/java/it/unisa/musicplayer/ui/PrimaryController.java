@@ -318,7 +318,7 @@ if (btnSpostaGiu != null) { btnSpostaGiu.setVisible(false); btnSpostaGiu.setMana
             btnPlay.setOnAction(e -> {
                 if (lettore.getStato() == StatoLettore.PLAYING) {
                     lettore.pausa();
-                    btnPlay.setText("���");
+                    btnPlay.setText("\u25B6");
                     timer.pause();
                 } else {
                     if (lettore.getTracciaCorrente() == null) {
@@ -392,7 +392,7 @@ if (btnSpostaGiu != null) { btnSpostaGiu.setVisible(false); btnSpostaGiu.setMana
                     timer.pause();
 
                     if (btnPlay != null) {
-                        btnPlay.setText("���");
+                        btnPlay.setText("\u25B6");
                     }
 
                     return;
@@ -562,7 +562,7 @@ if (btnSpostaGiu != null) { btnSpostaGiu.setVisible(false); btnSpostaGiu.setMana
                                 timer.pause();
 
                                 if (btnPlay != null) {
-                                    btnPlay.setText("���");
+                                    btnPlay.setText("\u25B6");
                                 }
 
                                 return;
@@ -903,7 +903,7 @@ CatalogoPlaylist.getInstance().getPlaylists().forEach(p ->
                             // L'uso della ObservableList aggiorna istantaneamente la tabella a schermo!
                         }
                     } else {
-                        songTableView.getSelectionModel().clearSelection(); // ��� aggiungi
+                        songTableView.getSelectionModel().clearSelection();
                     }
                 } catch (IllegalArgumentException ex) {
                     Alert alert = new Alert(Alert.AlertType.ERROR, "Errore di validazione della modifica: " + ex.getMessage());
@@ -1080,7 +1080,7 @@ if (btnRemoveTrack != null) {
 
                 righeTracce.add(
                         String.format(
-                                "%d. %s ��� %s (%d riproduzioni)",
+                                 "%d. %s \u2014 %s (%d riproduzioni)",
                                 i + 1,
                                 traccia.getTitolo(),
                                 traccia.getAutore(),
@@ -1241,7 +1241,7 @@ if (btnRemoveTrack != null) {
                     // Non fermare la riproduzione corrente
                     // Solo prepara la coda per il prossimo play
                     if (btnPlay != null) btnPlay.setText(
-                            lettore.getStato() == StatoLettore.PLAYING ? "||" : "���"
+                            lettore.getStato() == StatoLettore.PLAYING ? "||" : "\u25B6"
                     );
                 }
             }
