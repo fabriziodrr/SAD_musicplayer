@@ -247,6 +247,11 @@
 .song-table .filler {
     -fx-background-color: transparent;
     -fx-size: 38px;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.song-table .column-header .arrow {
+    -fx-padding: 0 0 0 4;
 }
 
 .song-table .column-header .label {
