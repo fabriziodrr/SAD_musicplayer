@@ -59,7 +59,7 @@
                   <HBox spacing="16.0">
                      <children>
                         <CheckBox fx:id="chkExplicit" mnemonicParsing="false" text="Esplicito [E]" />
-                        <CheckBox fx:id="chkFavorite" mnemonicParsing="false" text="Preferito ★" />
+                         <CheckBox fx:id="chkFavorite" mnemonicParsing="false" text="Preferito &#x2605;" />
                         <CheckBox fx:id="chkNewRelease" mnemonicParsing="false" text="Nuova Uscita [NEW]" />
                      </children>
                   </HBox>

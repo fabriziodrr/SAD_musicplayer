@@ -38,7 +38,7 @@
                </children>
             </HBox>
             <Region HBox.hgrow="ALWAYS" />
-            <Button fx:id="undoButton" mnemonicParsing="false" styleClass="pill-button" text="↶ Annulla" />
+             <Button fx:id="undoButton" mnemonicParsing="false" styleClass="pill-button" text="Annulla" />
          </children>
       </HBox>
    </top>
@@ -51,7 +51,7 @@
                   <Label styleClass="section-subtitle" text="PLAYLIST" />
                   <Region HBox.hgrow="ALWAYS" />
                   <Button fx:id="createNewPlaylistButton" mnemonicParsing="false" styleClass="icon-button" text="+" />
-                  <Button fx:id="btnGeneraPlaylistAuto" mnemonicParsing="false" styleClass="icon-button" text="⚡" />
+                   <Button fx:id="btnGeneraPlaylistAuto" mnemonicParsing="false" styleClass="icon-button" text="&#x26A1;" />
                </children>
             </HBox>
             <ListView fx:id="sidebarListView" VBox.vgrow="ALWAYS" />
@@ -71,7 +71,7 @@
                      <children>
                         <HBox alignment="CENTER_LEFT" spacing="14.0">
                            <children>
-                              <Button fx:id="mainPlaylistPlayButton" maxHeight="42.0" maxWidth="42.0" minHeight="42.0" minWidth="42.0" mnemonicParsing="false" styleClass="play-button" text="▶" />
+                               <Button fx:id="mainPlaylistPlayButton" maxHeight="42.0" maxWidth="42.0" minHeight="42.0" minWidth="42.0" mnemonicParsing="false" styleClass="play-button" text="&#x25B6;" />
                               <VBox spacing="3.0">
                                  <children>
                                     <Label fx:id="catalogTitleLabel" styleClass="section-title" text="Catalogo Globale" />
@@ -82,13 +82,13 @@
                                <HBox alignment="CENTER_RIGHT" spacing="8.0" styleClass="action-toolbar">
                                   <children>
                                      <Button fx:id="btnOpenMockDialog" mnemonicParsing="false" styleClass="action-button, action-button-primary" text="♪ Brano" />
-                                     <Button fx:id="btnAddToPlaylist" mnemonicParsing="false" styleClass="action-button, action-button-secondary" text="＋ Playlist" />
-                                     <Button fx:id="btnEditTrack" mnemonicParsing="false" styleClass="action-button, action-button-secondary" text="✎ Modifica" />
-                                     <Button fx:id="btnSpostaSu" mnemonicParsing="false" 
-                                      styleClass="action-button, action-button-secondary" text="▲" />
-                                     <Button fx:id="btnSpostaGiu" mnemonicParsing="false" 
-                                      styleClass="action-button, action-button-secondary" text="▼" />
-                                     <Button fx:id="btnRemoveTrack" mnemonicParsing="false" styleClass="action-button, action-button-danger" text="✕ Rimuovi" />
+                                      <Button fx:id="btnAddToPlaylist" mnemonicParsing="false" styleClass="action-button, action-button-secondary" text="+ Playlist" />
+                                      <Button fx:id="btnEditTrack" mnemonicParsing="false" styleClass="action-button, action-button-secondary" text="&#x270E; Modifica" />
+                                      <Button fx:id="btnSpostaSu" mnemonicParsing="false" 
+                                       styleClass="action-button, action-button-secondary" text="&#x25B2;" />
+                                      <Button fx:id="btnSpostaGiu" mnemonicParsing="false" 
+                                       styleClass="action-button, action-button-secondary" text="&#x25BC;" />
+                                      <Button fx:id="btnRemoveTrack" mnemonicParsing="false" styleClass="action-button, action-button-danger" text="&#x2715; Rimuovi" />
                                   </children>
                                </HBox>
                            </children>
@@ -114,7 +114,7 @@
                                              prefHeight="34.0"
                                              prefWidth="104.0"
                                              styleClass="player-control-button, playlist-mode-button"
-                                             text="→ Sequenza">
+                                              text="&#x2192; Sequenza">
                                  <tooltip>
                                     <Tooltip text="Sequenziale" />
                                  </tooltip>
@@ -128,7 +128,7 @@
                                              prefHeight="34.0"
                                              prefWidth="82.0"
                                              styleClass="player-control-button, playlist-mode-button"
-                                             text="↻ Loop">
+                                              text="&#x21BB; Loop">
                                  <tooltip>
                                     <Tooltip text="Loop" />
                                  </tooltip>
@@ -142,7 +142,7 @@
                                              prefHeight="34.0"
                                              prefWidth="90.0"
                                              styleClass="player-control-button, playlist-mode-button"
-                                             text="⇄ Shuffle">
+                                              text="&#x21C4; Shuffle">
                                  <tooltip>
                                     <Tooltip text="Shuffle" />
                                  </tooltip>
@@ -266,7 +266,7 @@
       </ImageView>
    </graphic>
             </Button>
-               <Button fx:id="btnPlay" maxHeight="36.0" maxWidth="36.0" minHeight="36.0" minWidth="36.0" mnemonicParsing="false" styleClass="primary-player-button" text="▶" />
+                <Button fx:id="btnPlay" maxHeight="36.0" maxWidth="36.0" minHeight="36.0" minWidth="36.0" mnemonicParsing="false" styleClass="primary-player-button" text="&#x25B6;" />
                <Button fx:id="btnSkip" mnemonicParsing="false" styleClass="player-control-button">
                  <graphic>
                <ImageView fitHeight="20.0" fitWidth="20.0">
