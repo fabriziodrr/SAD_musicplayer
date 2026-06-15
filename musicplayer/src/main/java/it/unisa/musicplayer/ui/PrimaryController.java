@@ -1689,8 +1689,8 @@ if (btnRemoveTrack != null) {
         boolean puoAnnullare = gestoreOperazioni.puoAnnullare();
         undoButton.setDisable(!puoAnnullare);
         undoButton.setText(puoAnnullare
-                ? "��� Annulla: " + gestoreOperazioni.getDescrizioneUltimaOperazione()
-                : "��� Annulla");
+                ? "Annulla: " + gestoreOperazioni.getDescrizioneUltimaOperazione()
+                : "Annulla");
     }
 
     private void sincronizzaCodaDopoUndo() {
