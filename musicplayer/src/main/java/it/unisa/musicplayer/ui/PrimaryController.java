@@ -730,7 +730,7 @@ CatalogoPlaylist.getInstance().getPlaylists().forEach(p ->
             sidebarListView.getSelectionModel().selectedItemProperty().addListener((o, old, newVal) -> {
                 if (newVal != null) {
                     mainTabPane.getSelectionModel().select(0);
-                    aggiornaNavigazioneAttiva(btnNavHome);
+                    aggiornaNavigazioneAttiva(null);
                     if (catalogTitleLabel != null) catalogTitleLabel.setText("Playlist: " + newVal.getNome());
                     if (songTableView != null) songTableView.setItems(newVal.getTracce());
                     playlistCorrenteUi = newVal;
